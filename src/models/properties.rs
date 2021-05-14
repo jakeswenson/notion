@@ -79,6 +79,7 @@ pub enum PropertyConfiguration {
     /// See https://developers.notion.com/reference/database#date-configuration
     Date { id: PropertyId },
     /// Represents a File Property
-    /// See https://developers.notion.com/reference/database#date-configuration
-    File { id: PropertyId },
+    /// See https://developers.notion.com/reference/database#file-configuration
+    /// Documentation issue: docs claim type name is `file` but it's is in fact `files`
+    Files { id: PropertyId },
 }
