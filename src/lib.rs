@@ -1,6 +1,5 @@
 use crate::models::search::SearchRequest;
 use crate::models::{Database, ListResponse};
-use std::collections::HashMap;
 
 mod models;
 
@@ -54,11 +53,15 @@ mod tests {
     use crate::NotionApi;
     const TEST_TOKEN: &'static str = include_str!(".api_token");
 
+    fn test_client() -> NotionApi {
+        NotionApi {
+            token: TEST_TOKEN.trim().to_string(),
+        }
+    }
+
     #[tokio::test]
     async fn list_databases() -> Result<(), Box<dyn std::error::Error>> {
-        let api = NotionApi {
-            token: TEST_TOKEN.to_string(),
-        };
+        let api = test_client();
 
         dbg!(api.list_databases().await?);
 
@@ -67,9 +70,7 @@ mod tests {
 
     #[tokio::test]
     async fn search() -> Result<(), Box<dyn std::error::Error>> {
-        let api = NotionApi {
-            token: TEST_TOKEN.to_string(),
-        };
+        let api = test_client();
 
         dbg!(
             api.search(NotionSearch::Filter {
