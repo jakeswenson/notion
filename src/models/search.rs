@@ -1,3 +1,4 @@
+use crate::models::paging::Paging;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
@@ -38,10 +39,6 @@ pub struct Filter {
     property: FilterProperty,
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone)]
-#[serde(transparent)]
-pub struct PagingCursor(String);
-
 #[derive(Serialize, Debug, Eq, PartialEq, Default)]
 pub struct SearchRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -50,10 +47,8 @@ pub struct SearchRequest {
     sort: Option<Sort>,
     #[serde(skip_serializing_if = "Option::is_none")]
     filter: Option<Filter>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    start_cursor: Option<PagingCursor>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    page_size: Option<u8>,
+    #[serde(flatten)]
+    paging: Option<Paging>,
 }
 
 #[derive(Debug, Eq, PartialEq)]

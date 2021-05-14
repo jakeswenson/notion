@@ -1,3 +1,4 @@
+pub mod paging;
 pub mod properties;
 pub mod search;
 pub mod text;
