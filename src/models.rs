@@ -1,7 +1,7 @@
 pub mod search;
 
-use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -108,15 +108,11 @@ pub struct Select {
 pub enum PropertyConfiguration {
     /// Represents the special Title property required on every database.
     /// See https://developers.notion.com/reference/database#title-configuration
-    Title {
-        id: PropertyId,
-    },
+    Title { id: PropertyId },
     /// Represents a Text property
     /// https://developers.notion.com/reference/database#text-configuration
     #[serde(rename = "rich_text")]
-    Text {
-        id: PropertyId,
-    },
+    Text { id: PropertyId },
     /// Represents a Number Property
     /// See https://developers.notion.com/reference/database#number-configuration
     Number {
@@ -126,20 +122,13 @@ pub enum PropertyConfiguration {
     },
     /// Represents a Select Property
     /// See https://developers.notion.com/reference/database#select-configuration
-    Select {
-        id: PropertyId,
-        select: Select,
-    },
+    Select { id: PropertyId, select: Select },
     /// Represents a Date Property
     /// See https://developers.notion.com/reference/database#date-configuration
-    Date {
-        id: PropertyId
-    },
+    Date { id: PropertyId },
     /// Represents a File Property
     /// See https://developers.notion.com/reference/database#date-configuration
-    File {
-        id: PropertyId
-    },
+    File { id: PropertyId },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
@@ -189,7 +178,7 @@ struct RichTextCommon {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Link {
-    url: String
+    url: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
@@ -217,6 +206,5 @@ pub enum RichText {
     Equation {
         #[serde(flatten)]
         rich_text: RichTextCommon,
-
     },
 }
