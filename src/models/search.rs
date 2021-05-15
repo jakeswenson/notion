@@ -1,5 +1,5 @@
 use crate::models::paging::Paging;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -60,8 +60,17 @@ pub enum TextCondition {
     DoesNotContain(String),
     StartsWith(String),
     EndsWith(String),
+    #[serde(serialize_with = "serialize_to_true")]
     IsEmpty,
+    #[serde(serialize_with = "serialize_to_true")]
     IsNotEmpty,
+}
+
+fn serialize_to_true<S>(serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_bool(true)
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -140,6 +149,34 @@ mod tests {
             assert_eq!(
                 dbg!(json),
                 r#"{"property":"Name","text":{"equals":"Test"}}"#
+            );
+
+            Ok(())
+        }
+
+        #[test]
+        fn text_property_contains() -> Result<(), Box<dyn std::error::Error>> {
+            let json = serde_json::to_string(&FilterCondition {
+                property: "Name".to_string(),
+                condition: Text(TextCondition::Contains("Test".to_string())),
+            })?;
+            assert_eq!(
+                dbg!(json),
+                r#"{"property":"Name","text":{"contains":"Test"}}"#
+            );
+
+            Ok(())
+        }
+
+        #[test]
+        fn text_property_is_empty() -> Result<(), Box<dyn std::error::Error>> {
+            let json = serde_json::to_string(&FilterCondition {
+                property: "Name".to_string(),
+                condition: Text(TextCondition::IsEmpty),
+            })?;
+            assert_eq!(
+                dbg!(json),
+                r#"{"property":"Name","text":{"is_empty":true}}"#
             );
 
             Ok(())
