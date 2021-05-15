@@ -8,8 +8,10 @@ use crate::models::text::RichText;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::Identifiable;
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
+use std::fmt::{Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -29,9 +31,17 @@ impl DatabaseId {
     }
 }
 
-impl AsRef<DatabaseId> for DatabaseId {
-    fn as_ref(&self) -> &Self {
+impl Identifiable for DatabaseId {
+    type Type = DatabaseId;
+
+    fn id(&self) -> &Self::Type {
         self
+    }
+}
+
+impl Display for DatabaseId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 
@@ -57,8 +67,10 @@ pub struct Database {
     properties: HashMap<String, PropertyConfiguration>,
 }
 
-impl AsRef<DatabaseId> for Database {
-    fn as_ref(&self) -> &DatabaseId {
+impl Identifiable for Database {
+    type Type = DatabaseId;
+
+    fn id(&self) -> &Self::Type {
         &self.id
     }
 }

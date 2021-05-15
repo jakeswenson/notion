@@ -51,6 +51,42 @@ pub struct SearchRequest {
     paging: Option<Paging>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum TextCondition {
+    Equals(String),
+    DoesNotEqual(String),
+    Contains(String),
+    DoesNotContain(String),
+    StartsWith(String),
+    EndsWith(String),
+    IsEmpty,
+    IsNotEmpty,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum PropertyCondition {
+    Text(TextCondition),
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct FilterCondition {
+    property: String,
+    #[serde(flatten)]
+    condition: PropertyCondition,
+}
+
+#[derive(Serialize, Debug, Eq, PartialEq, Default)]
+pub struct DatabaseQuery {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sorts: Option<Sort>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    filter: Option<FilterCondition>,
+    #[serde(flatten)]
+    paging: Option<Paging>,
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum NotionSearch {
     Query(String),
@@ -85,6 +121,28 @@ impl From<NotionSearch> for SearchRequest {
                 filter: Some(Filter { value, property }),
                 ..Default::default()
             },
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod text_filters {
+        use crate::models::search::PropertyCondition::Text;
+        use crate::models::search::{FilterCondition, PropertyCondition, TextCondition};
+
+        #[test]
+        fn text_property_equals() -> Result<(), Box<dyn std::error::Error>> {
+            let json = serde_json::to_string(&FilterCondition {
+                property: "Name".to_string(),
+                condition: Text(TextCondition::Equals("Test".to_string())),
+            })?;
+            assert_eq!(
+                dbg!(json),
+                r#"{"property":"Name","text":{"equals":"Test"}}"#
+            );
+
+            Ok(())
         }
     }
 }

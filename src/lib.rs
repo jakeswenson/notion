@@ -11,6 +11,23 @@ const NOTION_API_VERSION: &'static str = "2021-05-13";
 // todo: replace with proper snafu error
 pub type NotionApiClientError = Box<dyn std::error::Error>;
 
+trait Identifiable {
+    // There should only be one way to identify an object
+    type Type;
+    fn id(&self) -> &Self::Type;
+}
+
+impl<T, U> Identifiable for &U
+where
+    U: Identifiable<Type = T>,
+{
+    type Type = T;
+
+    fn id(&self) -> &Self::Type {
+        self.id()
+    }
+}
+
 struct NotionApi {
     client: Client,
 }
@@ -63,14 +80,34 @@ impl NotionApi {
         .await?)
     }
 
-    pub async fn get_database<T: AsRef<DatabaseId>>(
+    pub async fn get_database<T: Identifiable<Type = DatabaseId>>(
         &self,
         database_id: T,
     ) -> Result<Database, Box<dyn std::error::Error>> {
         Ok(NotionApi::make_json_request(self.client.get(format!(
             "https://api.notion.com/v1/databases/{}",
-            database_id.as_ref().id()
+            database_id.id().id()
         )))
+        .await?)
+    }
+
+    pub async fn query_database<D, T>(
+        &self,
+        database: D,
+        query: T,
+    ) -> Result<ListResponse<Database>, NotionApiClientError>
+    where
+        T: Into<SearchRequest>,
+        D: Identifiable<Type = DatabaseId>,
+    {
+        Ok(NotionApi::make_json_request(
+            self.client
+                .post(&format!(
+                    "https://api.notion.com/v1/databases/{database_id}/query",
+                    database_id = database.id()
+                ))
+                .json(&query.into()),
+        )
         .await?)
     }
 }
