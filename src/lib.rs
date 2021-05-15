@@ -3,11 +3,17 @@ use crate::models::{Database, ListResponse};
 
 mod models;
 
-struct NotionApi {
+pub struct NotionApi {
     token: String,
 }
 
 impl NotionApi {
+    pub fn new(token: &'static str) -> NotionApi {
+        NotionApi {
+            token: token.trim().to_string()
+        }
+    }
+
     /// This method is apparently deprecated
     pub async fn list_databases(
         &self,
@@ -54,9 +60,7 @@ mod tests {
     const TEST_TOKEN: &'static str = include_str!(".api_token");
 
     fn test_client() -> NotionApi {
-        NotionApi {
-            token: TEST_TOKEN.trim().to_string(),
-        }
+        NotionApi::new(TEST_TOKEN)
     }
 
     #[tokio::test]
