@@ -1,5 +1,5 @@
-use crate::models::search::SearchRequest;
-use crate::models::{Database, DatabaseId, ListResponse};
+use crate::models::search::{DatabaseQuery, SearchRequest};
+use crate::models::{Database, DatabaseId, ListResponse, Object, Page};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
@@ -54,6 +54,7 @@ impl NotionApi {
         T: DeserializeOwned,
     {
         let json = request.send().await?.text().await?;
+        println!("JSON: {}", json);
         dbg!(serde_json::from_str::<serde_json::Value>(&json)?);
         let result = serde_json::from_str(&json)?;
         Ok(result)
@@ -71,7 +72,7 @@ impl NotionApi {
     pub async fn search<T: Into<SearchRequest>>(
         &self,
         query: T,
-    ) -> Result<ListResponse<Database>, Box<dyn std::error::Error>> {
+    ) -> Result<ListResponse<Database>, NotionApiClientError> {
         Ok(NotionApi::make_json_request(
             self.client
                 .post("https://api.notion.com/v1/search")
@@ -83,7 +84,7 @@ impl NotionApi {
     pub async fn get_database<T: Identifiable<Type = DatabaseId>>(
         &self,
         database_id: T,
-    ) -> Result<Database, Box<dyn std::error::Error>> {
+    ) -> Result<Database, NotionApiClientError> {
         Ok(NotionApi::make_json_request(self.client.get(format!(
             "https://api.notion.com/v1/databases/{}",
             database_id.id().id()
@@ -95,9 +96,9 @@ impl NotionApi {
         &self,
         database: D,
         query: T,
-    ) -> Result<ListResponse<Database>, NotionApiClientError>
+    ) -> Result<ListResponse<Page>, NotionApiClientError>
     where
-        T: Into<SearchRequest>,
+        T: Into<DatabaseQuery>,
         D: Identifiable<Type = DatabaseId>,
     {
         Ok(NotionApi::make_json_request(
@@ -114,8 +115,12 @@ impl NotionApi {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::search::{FilterProperty, FilterValue, NotionSearch};
+    use crate::models::search::PropertyCondition::Text;
+    use crate::models::search::{
+        DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
+    };
     use crate::NotionApi;
+
     const TEST_TOKEN: &'static str = include_str!(".api_token");
 
     fn test_client() -> NotionApi {
@@ -162,6 +167,37 @@ mod tests {
         let db_result = api.get_database(&db).await?;
 
         assert_eq!(db, db_result);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn query_database() -> Result<(), Box<dyn std::error::Error>> {
+        let api = test_client();
+
+        let response = api
+            .search(NotionSearch::Filter {
+                value: FilterValue::Database,
+                property: FilterProperty::Object,
+            })
+            .await?;
+
+        let db = dbg!(response.results()[0].clone());
+
+        let pages = api
+            .query_database(
+                db,
+                DatabaseQuery {
+                    filter: Some(FilterCondition {
+                        property: "Name".to_string(),
+                        condition: Text(TextCondition::Contains("First".to_string())),
+                    }),
+                    ..Default::default()
+                },
+            )
+            .await?;
+
+        assert_eq!(pages.results().len(), 1);
 
         Ok(())
     }

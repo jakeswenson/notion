@@ -104,9 +104,13 @@ impl PageId {
 #[serde(rename_all = "snake_case")]
 pub enum Parent {
     #[serde(rename = "database_id")]
-    Database(#[serde(rename = "database_id")] DatabaseId),
+    Database {
+        database_id: DatabaseId,
+    },
     #[serde(rename = "page_id")]
-    Page(#[serde(rename = "page_id")] PageId),
+    Page {
+        page_id: PageId,
+    },
     Workspace,
 }
 
@@ -190,10 +194,16 @@ pub enum User {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::Page;
+    use crate::models::{ListResponse, Page};
 
     #[test]
     fn deserialize_page() {
         let _page: Page = serde_json::from_str(include_str!("models/tests/page.json")).unwrap();
+    }
+
+    #[test]
+    fn deserialize_query_result() {
+        let _page: ListResponse<Page> =
+            serde_json::from_str(include_str!("models/tests/query_result.json")).unwrap();
     }
 }

@@ -72,19 +72,19 @@ pub enum PropertyCondition {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct FilterCondition {
-    property: String,
+    pub property: String,
     #[serde(flatten)]
-    condition: PropertyCondition,
+    pub condition: PropertyCondition,
 }
 
 #[derive(Serialize, Debug, Eq, PartialEq, Default)]
 pub struct DatabaseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
-    sorts: Option<Sort>,
+    pub sorts: Option<Sort>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    filter: Option<FilterCondition>,
+    pub filter: Option<FilterCondition>,
     #[serde(flatten)]
-    paging: Option<Paging>,
+    pub paging: Option<Paging>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
