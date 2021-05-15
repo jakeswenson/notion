@@ -17,17 +17,6 @@ trait Identifiable {
     fn id(&self) -> &Self::Type;
 }
 
-impl<T, U> Identifiable for &U
-where
-    U: Identifiable<Type = T>,
-{
-    type Type = T;
-
-    fn id(&self) -> &Self::Type {
-        self.id()
-    }
-}
-
 struct NotionApi {
     client: Client,
 }
@@ -119,7 +108,7 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
-    use crate::NotionApi;
+    use crate::{Identifiable, NotionApi};
 
     const TEST_TOKEN: &'static str = include_str!(".api_token");
 
@@ -164,7 +153,8 @@ mod tests {
 
         let db = response.results()[0].clone();
 
-        let db_result = api.get_database(&db).await?;
+        // todo: fix this clone issue
+        let db_result = api.get_database(db.clone()).await?;
 
         assert_eq!(db, db_result);
 
