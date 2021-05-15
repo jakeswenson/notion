@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum TextColor {
     Default,
@@ -26,23 +26,23 @@ pub enum TextColor {
 
 /// Rich text annotations
 /// See https://developers.notion.com/reference/rich-text#annotations
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 struct Annotations {
-    bold: bool,
-    code: bool,
-    color: TextColor,
-    italic: bool,
-    strikethrough: bool,
-    underline: bool,
+    bold: Option<bool>,
+    code: Option<bool>,
+    color: Option<TextColor>,
+    italic: Option<bool>,
+    strikethrough: Option<bool>,
+    underline: Option<bool>,
 }
 
 /// Properties common on all rich text objects
 /// See https://developers.notion.com/reference/rich-text#all-rich-text
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RichTextCommon {
     plain_text: String,
     href: Option<String>,
-    annotations: Annotations,
+    annotations: Option<Annotations>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
@@ -50,13 +50,17 @@ pub struct Link {
     url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Text {
     content: String,
     link: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+/// Rich text objects contain data for displaying formatted text, mentions, and equations.
+/// A rich text object also contains annotations for style information.
+/// Arrays of rich text objects are used within property objects and property
+/// value objects to create what a user sees as a single text value in Notion.
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum RichText {
