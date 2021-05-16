@@ -43,8 +43,11 @@ impl NotionApi {
         T: DeserializeOwned,
     {
         let json = request.send().await?.text().await?;
-        println!("JSON: {}", json);
-        dbg!(serde_json::from_str::<serde_json::Value>(&json)?);
+        #[cfg(test)]
+        {
+            println!("JSON: {}", json);
+            dbg!(serde_json::from_str::<serde_json::Value>(&json)?);
+        }
         let result = serde_json::from_str(&json)?;
         Ok(result)
     }
@@ -61,7 +64,7 @@ impl NotionApi {
     pub async fn search<T: Into<SearchRequest>>(
         &self,
         query: T,
-    ) -> Result<ListResponse<Database>, NotionApiClientError> {
+    ) -> Result<ListResponse<Object>, NotionApiClientError> {
         Ok(NotionApi::make_json_request(
             self.client
                 .post("https://api.notion.com/v1/search")
@@ -108,6 +111,7 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
+    use crate::models::Object;
     use crate::{Identifiable, NotionApi};
 
     fn test_token() -> String {
@@ -137,16 +141,33 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn search() -> Result<(), Box<dyn std::error::Error>> {
+    async fn search_databases() -> Result<(), Box<dyn std::error::Error>> {
         let api = test_client();
 
-        dbg!(
-            api.search(NotionSearch::Filter {
+        let response = api
+            .search(NotionSearch::Filter {
+                property: FilterProperty::Object,
                 value: FilterValue::Database,
-                property: FilterProperty::Object
             })
-            .await?
-        );
+            .await?;
+
+        assert!(response.results.len() > 0);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn search_pages() -> Result<(), Box<dyn std::error::Error>> {
+        let api = test_client();
+
+        let response = api
+            .search(NotionSearch::Filter {
+                property: FilterProperty::Object,
+                value: FilterValue::Page,
+            })
+            .await?;
+
+        assert!(response.results.len() > 0);
 
         Ok(())
     }
@@ -162,7 +183,16 @@ mod tests {
             })
             .await?;
 
-        let db = response.results()[0].clone();
+        let db = response
+            .results()
+            .iter()
+            .filter_map(|o| match o {
+                Object::Database { database } => Some(database),
+                _ => None,
+            })
+            .next()
+            .expect("Test expected to find at least one database in notion")
+            .clone();
 
         // todo: fix this clone issue
         let db_result = api.get_database(db.clone()).await?;
@@ -183,7 +213,16 @@ mod tests {
             })
             .await?;
 
-        let db = dbg!(response.results()[0].clone());
+        let db = response
+            .results()
+            .iter()
+            .filter_map(|o| match o {
+                Object::Database { database } => Some(database),
+                _ => None,
+            })
+            .next()
+            .expect("Test expected to find at least one database in notion")
+            .clone();
 
         let pages = api
             .query_database(
