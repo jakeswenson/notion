@@ -8,7 +8,7 @@ on:
 
 jobs:
   static-analysis:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install cargo components
@@ -26,12 +26,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
   build:
-    strategy:
-      matrix:
-        build:
-          - type: linux
-            os: ubuntu-latest
-    runs-on: ${{matrix.build.os}}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build
