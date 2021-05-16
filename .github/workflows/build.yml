@@ -37,4 +37,6 @@ jobs:
       - name: Build
         run: .ci/build.sh
       - name: Run tests
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
         run: .ci/test.sh
