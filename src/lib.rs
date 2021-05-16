@@ -104,14 +104,14 @@ impl NotionApi {
         .await?)
     }
 
-    pub async fn get_block_children<T: Identifiable>(
+    pub async fn get_block_children<T: Identifiable<Type = String>>(
         &self,
         block_id: T
     ) -> Result<ListResponse<Block>, NotionApiClientError> {
         Ok(NotionApi::make_json_request(
             self.client.get(&format!(
                 "https://api.notion.com/v1/blocks/{block_id}/children",
-                block_id = block_id.id().
+                block_id = block_id.id().id()
             ))
         ).await?)
     }

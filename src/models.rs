@@ -168,17 +168,38 @@ impl Display for BlockId {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum BlockType {
+    Paragraph,
+    Heading1,
+    Heading2,
+    Heading3,
+    BulletedListItem,
+    NumberedListItem,
+    ToDo,
+    Toggle,
+    ChildPage,
+    Unsupported
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Block {
     id: BlockId,
+    r#type: BlockType,
     created_time: DateTime<Utc>,
     last_edited_time: DateTime<Utc>,
     has_children: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+
+#[derive(Eq, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(tag = "object")]
 #[serde(rename_all = "snake_case")]
 pub enum Object {
+    Block {
+        #[serde(flatten)]
+        block: Block
+    },
     Database {
         #[serde(flatten)]
         database: Database,
@@ -195,7 +216,6 @@ pub enum Object {
         #[serde(flatten)]
         user: User,
     },
-    Block {},
 }
 
 impl Object {
