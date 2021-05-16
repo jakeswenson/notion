@@ -11,13 +11,13 @@ const NOTION_API_VERSION: &'static str = "2021-05-13";
 // todo: replace with proper snafu error
 pub type NotionApiClientError = Box<dyn std::error::Error>;
 
-trait Identifiable {
+pub trait Identifiable {
     // There should only be one way to identify an object
     type Type;
     fn id(&self) -> &Self::Type;
 }
 
-struct NotionApi {
+pub struct NotionApi {
     client: Client,
 }
 
@@ -112,7 +112,7 @@ mod tests {
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
     use crate::models::Object;
-    use crate::{Identifiable, NotionApi};
+    use crate::NotionApi;
 
     fn test_token() -> String {
         let token = {
