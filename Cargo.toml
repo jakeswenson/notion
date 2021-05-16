@@ -4,6 +4,9 @@ version = "0.0.1-alpha.1"
 authors = ["Jake Swenson <jake@jakeswenson.com>"]
 edition = "2018"
 
+description = "A Notion Api Client"
+license = "MIT"
+
 [dependencies]
 serde_json = "1.0.64"
 
