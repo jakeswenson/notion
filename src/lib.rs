@@ -1,5 +1,5 @@
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Database, DatabaseId, ListResponse, Object, Page, Block};
+use crate::models::{Database, DatabaseId, ListResponse, Object, Page, Block, BlockId};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
@@ -104,7 +104,7 @@ impl NotionApi {
         .await?)
     }
 
-    pub async fn get_block_children<T: Identifiable<Type = String>>(
+    pub async fn get_block_children<T: Identifiable<Type = BlockId>>(
         &self,
         block_id: T
     ) -> Result<ListResponse<Block>, NotionApiClientError> {
@@ -210,6 +210,34 @@ mod tests {
         let db_result = api.get_database(db.clone()).await?;
 
         assert_eq!(db, db_result);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn get_block_children() -> Result<(), Box<dyn std::error::Error>> {
+        let api = test_client();
+
+        let search_response = api
+            .search(NotionSearch::Filter {
+                value: FilterValue::Page,
+                property: FilterProperty::Object,
+            })
+            .await?;
+
+        for page in search_response.results() {
+            let response = api
+                .get_block_children(page)
+                .await?;
+        }
+
+
+        // let db = response.results()[0].clone();
+        //
+        // // todo: fix this clone issue
+        // let db_result = api.get_database(db.clone()).await?;
+        //
+        // assert_eq!(db, db_result);
 
         Ok(())
     }

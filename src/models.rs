@@ -183,14 +183,90 @@ pub enum BlockType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct Block {
+pub struct BlockCommon {
     id: BlockId,
-    r#type: BlockType,
     created_time: DateTime<Utc>,
     last_edited_time: DateTime<Utc>,
     has_children: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TextAndChildren {
+    text: Vec<RichText>,
+    children: Option<Vec<Block>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Text {
+    text: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ToDoFields {
+    text: Vec<RichText>,
+    checked: bool,
+    children: Option<Vec<Block>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ChildPageFields {
+    title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum Block {
+    Paragraph {
+        #[serde(flatten)]
+        common: BlockCommon,
+        paragraph: TextAndChildren
+    },
+    #[serde(rename="heading_1")]
+    Heading1 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_1: Text,
+    },
+    #[serde(rename="heading_2")]
+    Heading2 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_2: Text,
+    },
+    #[serde(rename="heading_3")]
+    Heading3 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_3: Text,
+    },
+    BulletedListItem {
+        #[serde(flatten)]
+        common: BlockCommon,
+        bulleted_list_item: TextAndChildren,
+    },
+    NumberedListItem {
+        #[serde(flatten)]
+        common: BlockCommon,
+        numbered_list_item: TextAndChildren,
+    },
+    ToDo {
+        #[serde(flatten)]
+        common: BlockCommon,
+        to_do: ToDoFields,
+    },
+    Toggle {
+        #[serde(flatten)]
+        common: BlockCommon,
+        toggle: TextAndChildren,
+    },
+    ChildPage {
+        #[serde(flatten)]
+        common: BlockCommon,
+        child_page: ChildPageFields,
+    },
+    Unsupported {}
+}
 
 #[derive(Eq, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(tag = "object")]
