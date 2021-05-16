@@ -162,10 +162,7 @@ pub enum Object {
 
 impl Object {
     pub fn is_database(&self) -> bool {
-        match self {
-            Object::Database { .. } => true,
-            _ => false,
-        }
+        matches!(self, Object::Database { .. })
     }
 }
 
