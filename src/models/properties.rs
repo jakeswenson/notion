@@ -157,7 +157,7 @@ pub enum PropertyConfiguration {
     Checkbox { id: PropertyId },
     /// Represents a URL Property
     /// See https://developers.notion.com/reference/database#url-configuration
-    URL { id: PropertyId },
+    Url { id: PropertyId },
     /// Represents a Email Property
     /// See https://developers.notion.com/reference/database#email-configuration
     Email { id: PropertyId },

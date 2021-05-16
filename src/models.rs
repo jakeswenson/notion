@@ -135,8 +135,45 @@ pub struct Page {
     parent: Parent,
 }
 
+impl Identifiable for String {
+    type Type = String;
+
+    fn id(&self) -> &Self::Type {
+        self
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
+#[serde(transparent)]
+pub struct BlockId(String);
+
+impl BlockId {
+    pub fn id(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Identifiable for BlockId {
+    type Type = BlockId;
+
+    fn id(&self) -> &Self::Type {
+        self
+    }
+}
+
+impl Display for BlockId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct Block {}
+pub struct Block {
+    id: BlockId,
+    created_time: DateTime<Utc>,
+    last_edited_time: DateTime<Utc>,
+    has_children: bool,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(tag = "object")]

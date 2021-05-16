@@ -1,10 +1,10 @@
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Database, DatabaseId, ListResponse, Object, Page};
+use crate::models::{Database, DatabaseId, ListResponse, Object, Page, Block};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
 
-mod models;
+pub mod models;
 
 const NOTION_API_VERSION: &'static str = "2021-05-13";
 
@@ -102,6 +102,18 @@ impl NotionApi {
                 .json(&query.into()),
         )
         .await?)
+    }
+
+    pub async fn get_block_children<T: Identifiable>(
+        &self,
+        block_id: T
+    ) -> Result<ListResponse<Block>, NotionApiClientError> {
+        Ok(NotionApi::make_json_request(
+            self.client.get(&format!(
+                "https://api.notion.com/v1/blocks/{block_id}/children",
+                block_id = block_id.id().
+            ))
+        ).await?)
     }
 }
 
