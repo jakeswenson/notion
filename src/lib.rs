@@ -3,13 +3,29 @@ use crate::models::{Database, DatabaseId, ListResponse, Object, Page};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
+use snafu::{ensure, Backtrace, ErrorCompat, ResultExt, Snafu};
 
 mod models;
 
 const NOTION_API_VERSION: &'static str = "2021-05-13";
 
-// todo: replace with proper snafu error
-pub type NotionApiClientError = Box<dyn std::error::Error>;
+#[derive(Debug, Snafu)]
+enum Error {
+    #[snafu(display("Invalid Notion API Token: {}", source))]
+    InvalidApiToken {
+        source: reqwest::header::InvalidHeaderValue,
+    },
+    #[snafu(display("Unable to build reqwest HTTP client: {}", source))]
+    ErrorBuildingClient { source: reqwest::Error },
+    #[snafu(display("Error sending HTTP request: {}", source))]
+    RequestFailed { source: reqwest::Error },
+
+    #[snafu(display("Error reading response: {}", source))]
+    ResponseError { source: reqwest::Error },
+
+    #[snafu(display("Error parsing json response: {}", source))]
+    JsonParseError { source: serde_json::Error },
+}
 
 trait Identifiable {
     // There should only be one way to identify an object
@@ -22,40 +38,48 @@ struct NotionApi {
 }
 
 impl NotionApi {
-    pub fn new(api_token: String) -> Result<Self, NotionApiClientError> {
+    pub fn new(api_token: String) -> Result<Self, Error> {
         let mut headers = HeaderMap::new();
         headers.insert(
             "Notion-Version",
             HeaderValue::from_static(NOTION_API_VERSION),
         );
 
-        let mut auth_value = HeaderValue::from_str(&format!("Bearer {}", api_token))?;
+        let mut auth_value =
+            HeaderValue::from_str(&format!("Bearer {}", api_token)).context(InvalidApiToken)?;
         auth_value.set_sensitive(true);
         headers.insert(header::AUTHORIZATION, auth_value);
 
-        let client = ClientBuilder::new().default_headers(headers).build()?;
+        let client = ClientBuilder::new()
+            .default_headers(headers)
+            .build()
+            .context(ErrorBuildingClient)?;
 
         Ok(Self { client })
     }
 
-    async fn make_json_request<T>(request: RequestBuilder) -> Result<T, NotionApiClientError>
+    async fn make_json_request<T>(request: RequestBuilder) -> Result<T, Error>
     where
         T: DeserializeOwned,
     {
-        let json = request.send().await?.text().await?;
+        let json = request
+            .send()
+            .await
+            .context(RequestFailed)?
+            .text()
+            .await
+            .context(ResponseError)?;
         #[cfg(test)]
         {
             println!("JSON: {}", json);
-            dbg!(serde_json::from_str::<serde_json::Value>(&json)?);
+            dbg!(serde_json::from_str::<serde_json::Value>(&json).context(JsonParseError)?);
         }
-        let result = serde_json::from_str(&json)?;
+        let result = serde_json::from_str(&json).context(JsonParseError)?;
         Ok(result)
     }
 
     /// This method is apparently deprecated/"not recommended"
-    pub async fn list_databases(
-        &self,
-    ) -> Result<ListResponse<Database>, Box<dyn std::error::Error>> {
+    pub async fn list_databases(&self) -> Result<ListResponse<Database>, Error> {
         let builder = self.client.get("https://api.notion.com/v1/databases");
 
         Ok(NotionApi::make_json_request(builder).await?)
@@ -64,7 +88,7 @@ impl NotionApi {
     pub async fn search<T: Into<SearchRequest>>(
         &self,
         query: T,
-    ) -> Result<ListResponse<Object>, NotionApiClientError> {
+    ) -> Result<ListResponse<Object>, Error> {
         Ok(NotionApi::make_json_request(
             self.client
                 .post("https://api.notion.com/v1/search")
@@ -76,7 +100,7 @@ impl NotionApi {
     pub async fn get_database<T: Identifiable<Type = DatabaseId>>(
         &self,
         database_id: T,
-    ) -> Result<Database, NotionApiClientError> {
+    ) -> Result<Database, Error> {
         Ok(NotionApi::make_json_request(self.client.get(format!(
             "https://api.notion.com/v1/databases/{}",
             database_id.id().id()
@@ -88,7 +112,7 @@ impl NotionApi {
         &self,
         database: D,
         query: T,
-    ) -> Result<ListResponse<Page>, NotionApiClientError>
+    ) -> Result<ListResponse<Page>, Error>
     where
         T: Into<DatabaseQuery>,
         D: Identifiable<Type = DatabaseId>,
