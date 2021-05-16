@@ -1,0 +1,48 @@
+on:
+  push:
+    tags:
+      - 'v*'
+name: Release
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Previous Draft Releases
+        uses: jakeswenson/action-delete-latest-release@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout # needed so that changelog generator can pull the latest release tag
+        uses: actions/checkout@v2
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v0.3.2
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: true
+          prerelease: false
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+  build-release:
+    name: Release Build
+    needs: create_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: build
+        run: .ci/build.sh
+      - name: Cargo Publish
+        if: matrix.build.publish == true
+        run: cargo publish --locked --token "${{secrets.crates_token}}"
