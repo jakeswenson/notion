@@ -8,13 +8,14 @@ use crate::models::text::RichText;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::models::paging::PagingCursor;
 use crate::Identifiable;
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
 use std::fmt::{Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Copy, Clone)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 enum ObjectType {
     Database,
     List,
@@ -77,9 +78,9 @@ impl Identifiable for Database {
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct ListResponse<T> {
-    results: Vec<T>,
-    next_cursor: Option<String>,
-    has_more: bool,
+    pub results: Vec<T>,
+    pub next_cursor: Option<PagingCursor>,
+    pub has_more: bool,
 }
 
 impl<T> ListResponse<T> {
@@ -136,17 +137,36 @@ pub struct Page {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Block {}
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(tag = "object")]
+#[serde(rename_all = "snake_case")]
 pub enum Object {
     Database {
         #[serde(flatten)]
         database: Database,
     },
-    Page {},
+    Page {
+        #[serde(flatten)]
+        page: Page,
+    },
     List {
+        #[serde(flatten)]
         list: ListResponse<Object>,
     },
+    User {
+        #[serde(flatten)]
+        user: User,
+    },
+    Block {},
+}
+
+impl Object {
+    pub fn is_database(&self) -> bool {
+        match self {
+            Object::Database { .. } => true,
+            _ => false,
+        }
+    }
 }
 
 /// A zero-cost wrapper type around a Page ID

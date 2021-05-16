@@ -29,14 +29,14 @@ pub enum FilterProperty {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Sort {
-    direction: SortDirection,
     timestamp: SortTimestamp,
+    direction: SortDirection,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Filter {
-    value: FilterValue,
     property: FilterProperty,
+    value: FilterValue,
 }
 
 #[derive(Serialize, Debug, Eq, PartialEq, Default)]
@@ -100,12 +100,12 @@ pub struct DatabaseQuery {
 pub enum NotionSearch {
     Query(String),
     Sort {
-        direction: SortDirection,
         timestamp: SortTimestamp,
+        direction: SortDirection,
     },
     Filter {
-        value: FilterValue,
         property: FilterProperty,
+        value: FilterValue,
     },
 }
 
