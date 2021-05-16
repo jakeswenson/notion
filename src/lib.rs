@@ -110,10 +110,19 @@ mod tests {
     };
     use crate::{Identifiable, NotionApi};
 
-    const TEST_TOKEN: &'static str = include_str!(".api_token");
+    fn test_token() -> String {
+        let token = {
+            if let Some(token) = std::env::var("NOTION_API_TOKEN").ok() {
+                token
+            } else {
+                include_str!(".api_token").to_string()
+            }
+        };
+        token.trim().to_string()
+    }
 
     fn test_client() -> NotionApi {
-        NotionApi::new(TEST_TOKEN.trim().to_string()).unwrap()
+        NotionApi::new(test_token()).unwrap()
     }
 
     #[tokio::test]
