@@ -181,5 +181,19 @@ mod tests {
 
             Ok(())
         }
+
+        #[test]
+        fn text_property_is_not_empty() -> Result<(), Box<dyn std::error::Error>> {
+            let json = serde_json::to_string(&FilterCondition {
+                property: "Name".to_string(),
+                condition: Text(TextCondition::IsNotEmpty),
+            })?;
+            assert_eq!(
+                dbg!(json),
+                r#"{"property":"Name","text":{"is_not_empty":true}}"#
+            );
+
+            Ok(())
+        }
     }
 }
