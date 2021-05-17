@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::models::paging::PagingCursor;
-use crate::Identifiable;
+use crate::AsIdentifier;
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
 use std::fmt::{Display, Formatter};
@@ -29,14 +29,6 @@ pub struct DatabaseId(String);
 impl DatabaseId {
     pub fn id(&self) -> &str {
         &self.0
-    }
-}
-
-impl Identifiable for DatabaseId {
-    type Type = DatabaseId;
-
-    fn id(&self) -> &Self::Type {
-        self
     }
 }
 
@@ -68,11 +60,9 @@ pub struct Database {
     properties: HashMap<String, PropertyConfiguration>,
 }
 
-impl Identifiable for Database {
-    type Type = DatabaseId;
-
-    fn id(&self) -> &Self::Type {
-        &self.id
+impl AsIdentifier<DatabaseId> for Database {
+    fn id(&self) -> DatabaseId {
+        self.id.clone()
     }
 }
 
@@ -222,10 +212,8 @@ pub enum Block {
     Unsupported,
 }
 
-impl Identifiable for Block {
-    type Type = BlockId;
-
-    fn id(&self) -> &Self::Type {
+impl AsIdentifier<BlockId> for Block {
+    fn id(&self) -> BlockId {
         use Block::*;
         match self {
             Paragraph { common, .. }
@@ -236,7 +224,7 @@ impl Identifiable for Block {
             | NumberedListItem { common, .. }
             | ToDo { common, .. }
             | Toggle { common, .. }
-            | ChildPage { common, .. } => &common.id,
+            | ChildPage { common, .. } => common.id.clone(),
             Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
             }
@@ -244,11 +232,15 @@ impl Identifiable for Block {
     }
 }
 
-impl Identifiable for Page {
-    type Type = PageId;
+impl AsIdentifier<PageId> for Page {
+    fn id(&self) -> PageId {
+        self.id.clone()
+    }
+}
 
-    fn id(&self) -> &Self::Type {
-        &self.id
+impl AsIdentifier<BlockId> for Page {
+    fn id(&self) -> BlockId {
+        self.id.clone().into()
     }
 }
 
@@ -286,17 +278,11 @@ impl BlockId {
     pub fn id(&self) -> &str {
         &self.0
     }
-
-    pub fn from(page_id: &PageId) -> Self {
-        BlockId(page_id.clone().0)
-    }
 }
 
-impl Identifiable for BlockId {
-    type Type = BlockId;
-
-    fn id(&self) -> &Self::Type {
-        self
+impl From<PageId> for BlockId {
+    fn from(page_id: PageId) -> Self {
+        BlockId(page_id.0.clone())
     }
 }
 
