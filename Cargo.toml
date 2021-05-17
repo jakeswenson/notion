@@ -29,3 +29,4 @@ features = ["derive"]
 
 [dev-dependencies]
 cargo-husky = "1"
+wiremock = "0.5.2"
