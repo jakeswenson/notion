@@ -41,8 +41,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: build
-        run: .ci/build.sh
+      - name: Release Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
       - name: Cargo Publish
-        if: matrix.build.publish == true
-        run: cargo publish --locked --token "${{secrets.crates_token}}"
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token "${{secrets.crates_token}}"
