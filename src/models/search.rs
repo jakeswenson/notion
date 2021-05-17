@@ -19,13 +19,6 @@ pub enum SortTimestamp {
 
 #[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
-pub enum DatabaseSortTimestamp {
-    CreatedTime,
-    LastEditedTime,
-}
-
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
-#[serde(rename_all = "snake_case")]
 pub enum FilterValue {
     Page,
     Database,
@@ -276,15 +269,22 @@ pub struct FilterCondition {
     pub condition: PropertyCondition,
 }
 
+#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum DatabaseSortTimestamp {
+    CreatedTime,
+    LastEditedTime,
+}
+
 #[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 pub struct DatabaseSort {
     // Todo: Should property and timestamp be mutually exclusive? (i.e a flattened enum?)
     //  the documentation is not clear:
     //  https://developers.notion.com/reference/post-database-query#post-database-query-sort
-    property: Option<String>,
+    pub property: Option<String>,
     /// The name of the timestamp to sort against.
-    timestamp: Option<SortTimestamp>,
-    direction: SortDirection,
+    pub timestamp: Option<DatabaseSortTimestamp>,
+    pub direction: SortDirection,
 }
 
 #[derive(Serialize, Debug, Eq, PartialEq, Default)]
@@ -322,13 +322,13 @@ impl From<NotionSearch> for SearchRequest {
                 timestamp,
             } => SearchRequest {
                 sort: Some(Sort {
-                    direction,
                     timestamp,
+                    direction,
                 }),
                 ..Default::default()
             },
-            NotionSearch::Filter { value, property } => SearchRequest {
-                filter: Some(Filter { value, property }),
+            NotionSearch::Filter { property, value } => SearchRequest {
+                filter: Some(Filter { property, value }),
                 ..Default::default()
             },
         }

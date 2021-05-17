@@ -3,14 +3,14 @@ use crate::models::{Database, DatabaseId, ListResponse, Object, Page};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
-use snafu::{ensure, Backtrace, ErrorCompat, ResultExt, Snafu};
+use snafu::{ResultExt, Snafu};
 
 mod models;
 
-const NOTION_API_VERSION: &'static str = "2021-05-13";
+const NOTION_API_VERSION: &str = "2021-05-13";
 
 #[derive(Debug, Snafu)]
-enum Error {
+pub enum Error {
     #[snafu(display("Invalid Notion API Token: {}", source))]
     InvalidApiToken {
         source: reqwest::header::InvalidHeaderValue,
