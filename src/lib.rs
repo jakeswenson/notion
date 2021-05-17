@@ -27,10 +27,8 @@ pub enum Error {
     JsonParseError { source: serde_json::Error },
 }
 
-pub trait Identifiable {
-    // There should only be one way to identify an object
-    type Type;
-    fn id(&self) -> &Self::Type;
+pub trait AsIdentifier<ById> {
+    fn id(&self) -> ById;
 }
 
 pub struct NotionApi {
@@ -97,7 +95,7 @@ impl NotionApi {
         .await?)
     }
 
-    pub async fn get_database<T: Identifiable<Type = DatabaseId>>(
+    pub async fn get_database<T: AsIdentifier<DatabaseId>>(
         &self,
         database_id: T,
     ) -> Result<Database, Error> {
@@ -115,7 +113,7 @@ impl NotionApi {
     ) -> Result<ListResponse<Page>, Error>
     where
         T: Into<DatabaseQuery>,
-        D: Identifiable<Type = DatabaseId>,
+        D: AsIdentifier<DatabaseId>,
     {
         Ok(NotionApi::make_json_request(
             self.client
@@ -128,7 +126,7 @@ impl NotionApi {
         .await?)
     }
 
-    pub async fn get_block_children<T: Identifiable<Type = BlockId>>(
+    pub async fn get_block_children<T: AsIdentifier<BlockId>>(
         &self,
         block_id: T,
     ) -> Result<ListResponse<Block>, Error> {
@@ -146,8 +144,8 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
-    use crate::models::{BlockId, Object};
-    use crate::{Identifiable, NotionApi};
+    use crate::models::Object;
+    use crate::NotionApi;
 
     fn test_token() -> String {
         let token = {
@@ -252,10 +250,7 @@ mod tests {
 
         for object in search_response.results {
             match object {
-                Object::Page { page } => api
-                    .get_block_children(BlockId::from(page.id()))
-                    .await
-                    .unwrap(),
+                Object::Page { page } => api.get_block_children(page).await.unwrap(),
                 _ => panic!("Should not have received anything but pages!"),
             };
         }
