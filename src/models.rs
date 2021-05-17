@@ -135,38 +135,6 @@ pub struct Page {
     parent: Parent,
 }
 
-impl Identifiable for String {
-    type Type = String;
-
-    fn id(&self) -> &Self::Type {
-        self
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
-#[serde(transparent)]
-pub struct BlockId(String);
-
-impl BlockId {
-    pub fn id(&self) -> &str {
-        &self.0
-    }
-}
-
-impl Identifiable for BlockId {
-    type Type = BlockId;
-
-    fn id(&self) -> &Self::Type {
-        self
-    }
-}
-
-impl Display for BlockId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum BlockType {
@@ -268,6 +236,34 @@ pub enum Block {
     Unsupported {}
 }
 
+impl Identifiable for Block {
+    type Type = BlockId;
+
+    fn id(&self) -> &Self::Type {
+        match self {
+            Block::Paragraph { common, paragraph: _ } => &common.id,
+            Block::Heading1 { common, heading_1: _} => &common.id,
+            Block::Heading2 { common, heading_2: _} => &common.id,
+            Block::Heading3 { common, heading_3: _} => &common.id,
+            Block::BulletedListItem { common, bulleted_list_item: _} => &common.id,
+            Block::NumberedListItem { common, numbered_list_item: _} => &common.id,
+            Block::ToDo { common, to_do: _ } => &common.id,
+            Block::Toggle { common, toggle: _} => &common.id,
+            Block::ChildPage { common, child_page: _} => &common.id,
+            Block::Unsupported {} => { panic!("Trying to reference identifier for unsupported block!") }
+        }
+
+    }
+}
+
+impl Identifiable for Page {
+    type Type = PageId;
+
+    fn id(&self) -> &Self::Type {
+        &self.id
+    }
+}
+
 #[derive(Eq, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(tag = "object")]
 #[serde(rename_all = "snake_case")]
@@ -292,6 +288,34 @@ pub enum Object {
         #[serde(flatten)]
         user: User,
     },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
+#[serde(transparent)]
+pub struct BlockId(String);
+
+impl BlockId {
+    pub fn id(&self) -> &str {
+        &self.0
+    }
+
+    pub fn from(page_id: &PageId) -> Self {
+        BlockId(page_id.clone().0)
+    }
+}
+
+impl Identifiable for BlockId {
+    type Type = BlockId;
+
+    fn id(&self) -> &Self::Type {
+        self
+    }
+}
+
+impl Display for BlockId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
 }
 
 impl Object {

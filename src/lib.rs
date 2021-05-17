@@ -111,7 +111,7 @@ impl NotionApi {
         Ok(NotionApi::make_json_request(
             self.client.get(&format!(
                 "https://api.notion.com/v1/blocks/{block_id}/children",
-                block_id = block_id.id().id()
+                block_id = block_id.id()
             ))
         ).await?)
     }
@@ -123,8 +123,8 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
-    use crate::models::Object;
-    use crate::NotionApi;
+    use crate::models::{Object, BlockId};
+    use crate::{NotionApi, Identifiable};
 
     fn test_token() -> String {
         let token = {
@@ -225,19 +225,14 @@ mod tests {
             })
             .await?;
 
-        for page in search_response.results() {
-            let response = api
-                .get_block_children(page)
-                .await?;
+        println!("{:?}", search_response.results.len());
+
+        for object in search_response.results {
+            let _block = match object {
+                Object::Page { page } => api.get_block_children(BlockId::from(page.id())).await.unwrap(),
+                _ => panic!("Should not have received anything but pages!")
+            };
         }
-
-
-        // let db = response.results()[0].clone();
-        //
-        // // todo: fix this clone issue
-        // let db_result = api.get_database(db.clone()).await?;
-        //
-        // assert_eq!(db, db_result);
 
         Ok(())
     }
