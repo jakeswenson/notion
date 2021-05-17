@@ -136,12 +136,130 @@ pub struct Page {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct Block {}
+pub struct BlockCommon {
+    id: BlockId,
+    created_time: DateTime<Utc>,
+    last_edited_time: DateTime<Utc>,
+    has_children: bool,
+}
 
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TextAndChildren {
+    text: Vec<RichText>,
+    children: Option<Vec<Block>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Text {
+    text: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ToDoFields {
+    text: Vec<RichText>,
+    checked: bool,
+    children: Option<Vec<Block>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ChildPageFields {
+    title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum Block {
+    Paragraph {
+        #[serde(flatten)]
+        common: BlockCommon,
+        paragraph: TextAndChildren,
+    },
+    #[serde(rename = "heading_1")]
+    Heading1 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_1: Text,
+    },
+    #[serde(rename = "heading_2")]
+    Heading2 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_2: Text,
+    },
+    #[serde(rename = "heading_3")]
+    Heading3 {
+        #[serde(flatten)]
+        common: BlockCommon,
+        heading_3: Text,
+    },
+    BulletedListItem {
+        #[serde(flatten)]
+        common: BlockCommon,
+        bulleted_list_item: TextAndChildren,
+    },
+    NumberedListItem {
+        #[serde(flatten)]
+        common: BlockCommon,
+        numbered_list_item: TextAndChildren,
+    },
+    ToDo {
+        #[serde(flatten)]
+        common: BlockCommon,
+        to_do: ToDoFields,
+    },
+    Toggle {
+        #[serde(flatten)]
+        common: BlockCommon,
+        toggle: TextAndChildren,
+    },
+    ChildPage {
+        #[serde(flatten)]
+        common: BlockCommon,
+        child_page: ChildPageFields,
+    },
+    #[serde(other)]
+    Unsupported,
+}
+
+impl Identifiable for Block {
+    type Type = BlockId;
+
+    fn id(&self) -> &Self::Type {
+        use Block::*;
+        match self {
+            Paragraph { common, .. }
+            | Heading1 { common, .. }
+            | Heading2 { common, .. }
+            | Heading3 { common, .. }
+            | BulletedListItem { common, .. }
+            | NumberedListItem { common, .. }
+            | ToDo { common, .. }
+            | Toggle { common, .. }
+            | ChildPage { common, .. } => &common.id,
+            Unsupported {} => {
+                panic!("Trying to reference identifier for unsupported block!")
+            }
+        }
+    }
+}
+
+impl Identifiable for Page {
+    type Type = PageId;
+
+    fn id(&self) -> &Self::Type {
+        &self.id
+    }
+}
+
+#[derive(Eq, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(tag = "object")]
 #[serde(rename_all = "snake_case")]
 pub enum Object {
+    Block {
+        #[serde(flatten)]
+        block: Block,
+    },
     Database {
         #[serde(flatten)]
         database: Database,
@@ -158,7 +276,34 @@ pub enum Object {
         #[serde(flatten)]
         user: User,
     },
-    Block {},
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
+#[serde(transparent)]
+pub struct BlockId(String);
+
+impl BlockId {
+    pub fn id(&self) -> &str {
+        &self.0
+    }
+
+    pub fn from(page_id: &PageId) -> Self {
+        BlockId(page_id.clone().0)
+    }
+}
+
+impl Identifiable for BlockId {
+    type Type = BlockId;
+
+    fn id(&self) -> &Self::Type {
+        self
+    }
+}
+
+impl Display for BlockId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
 }
 
 impl Object {

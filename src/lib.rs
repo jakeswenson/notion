@@ -1,11 +1,11 @@
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Database, DatabaseId, ListResponse, Object, Page};
+use crate::models::{Block, BlockId, Database, DatabaseId, ListResponse, Object, Page};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
 use snafu::{ResultExt, Snafu};
 
-mod models;
+pub mod models;
 
 const NOTION_API_VERSION: &str = "2021-05-13";
 
@@ -127,6 +127,17 @@ impl NotionApi {
         )
         .await?)
     }
+
+    pub async fn get_block_children<T: Identifiable<Type = BlockId>>(
+        &self,
+        block_id: T,
+    ) -> Result<ListResponse<Block>, Error> {
+        Ok(NotionApi::make_json_request(self.client.get(&format!(
+            "https://api.notion.com/v1/blocks/{block_id}/children",
+            block_id = block_id.id()
+        )))
+        .await?)
+    }
 }
 
 #[cfg(test)]
@@ -135,8 +146,8 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
-    use crate::models::Object;
-    use crate::NotionApi;
+    use crate::models::{BlockId, Object};
+    use crate::{Identifiable, NotionApi};
 
     fn test_token() -> String {
         let token = {
@@ -222,6 +233,32 @@ mod tests {
         let db_result = api.get_database(db.clone()).await?;
 
         assert_eq!(db, db_result);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn get_block_children() -> Result<(), Box<dyn std::error::Error>> {
+        let api = test_client();
+
+        let search_response = api
+            .search(NotionSearch::Filter {
+                value: FilterValue::Page,
+                property: FilterProperty::Object,
+            })
+            .await?;
+
+        println!("{:?}", search_response.results.len());
+
+        for object in search_response.results {
+            match object {
+                Object::Page { page } => api
+                    .get_block_children(BlockId::from(page.id()))
+                    .await
+                    .unwrap(),
+                _ => panic!("Should not have received anything but pages!"),
+            };
+        }
 
         Ok(())
     }
