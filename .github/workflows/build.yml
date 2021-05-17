@@ -30,8 +30,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build
-        run: .ci/build.sh
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all-features
       - name: Run tests
+        uses: actions-rs/cargo@v1
         env:
           NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
-        run: .ci/test.sh
+        with:
+          command: test
+          args: --all-features

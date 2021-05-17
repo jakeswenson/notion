@@ -292,7 +292,7 @@ pub enum PropertyValue {
         id: PropertyId,
         checkbox: bool,
     },
-    URL {
+    Url {
         id: PropertyId,
         url: String,
     },
