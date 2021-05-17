@@ -41,3 +41,9 @@ jobs:
         with:
           command: test
           args: --all-features
+      - name: Docs
+        uses: actions-rs/cargo@v1
+        env:
+          NOTION_API_TOKEN: ${{ secrets.NOTION_API_TOKEN }}
+        with:
+          command: doc

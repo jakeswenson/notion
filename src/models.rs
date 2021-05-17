@@ -282,7 +282,7 @@ impl BlockId {
 
 impl From<PageId> for BlockId {
     fn from(page_id: PageId) -> Self {
-        BlockId(page_id.0.clone())
+        BlockId(page_id.0)
     }
 }
 
