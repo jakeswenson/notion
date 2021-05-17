@@ -9,6 +9,7 @@ pub mod models;
 
 const NOTION_API_VERSION: &str = "2021-05-13";
 
+/// An wrapper Error type for all errors produced by the [`NotionApi`](NotionApi) client.
 #[derive(Debug, Snafu)]
 pub enum Error {
     #[snafu(display("Invalid Notion API Token: {}", source))]
@@ -27,15 +28,21 @@ pub enum Error {
     JsonParseError { source: serde_json::Error },
 }
 
+/// Meant to be a helpful trait allowing anything that can be
+/// identified by the type specified in `ById`.
 pub trait AsIdentifier<ById> {
     fn id(&self) -> ById;
 }
 
+/// An API client for Notion.
+/// Create a client by using [new(api_token: String)](Self::new()).
 pub struct NotionApi {
     client: Client,
 }
 
 impl NotionApi {
+    /// Creates an instance of NotionApi.
+    /// May fail if the provided api_token is an improper value.
     pub fn new(api_token: String) -> Result<Self, Error> {
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -76,13 +83,18 @@ impl NotionApi {
         Ok(result)
     }
 
-    /// This method is apparently deprecated/"not recommended"
+    /// List all the databases shared with the supplied integration token.
+    /// > This method is apparently deprecated/"not recommended" and
+    /// > [search()](Self::search()) should be used instead.
     pub async fn list_databases(&self) -> Result<ListResponse<Database>, Error> {
         let builder = self.client.get("https://api.notion.com/v1/databases");
 
         Ok(NotionApi::make_json_request(builder).await?)
     }
 
+    /// Search all pages in notion.
+    /// Query: can either be a [SearchRequest] or a
+    /// [NotionSearch](models::search::NotionSearch) query.
     pub async fn search<T: Into<SearchRequest>>(
         &self,
         query: T,
@@ -95,6 +107,7 @@ impl NotionApi {
         .await?)
     }
 
+    /// Get a database by [DatabaseId].
     pub async fn get_database<T: AsIdentifier<DatabaseId>>(
         &self,
         database_id: T,
@@ -106,6 +119,7 @@ impl NotionApi {
         .await?)
     }
 
+    /// Query a database and return the matching pages.
     pub async fn query_database<D, T>(
         &self,
         database: D,
