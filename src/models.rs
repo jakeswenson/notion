@@ -226,17 +226,18 @@ impl Identifiable for Block {
     type Type = BlockId;
 
     fn id(&self) -> &Self::Type {
+        use Block::*;
         match self {
-            Block::Paragraph { common, .. }
-            | Block::Heading1 { common, .. }
-            | Block::Heading2 { common, .. }
-            | Block::Heading3 { common, .. }
-            | Block::BulletedListItem { common, .. }
-            | Block::NumberedListItem { common, .. }
-            | Block::ToDo { common, .. }
-            | Block::Toggle { common, .. }
-            | Block::ChildPage { common, .. } => &common.id,
-            Block::Unsupported {} => {
+            Paragraph { common, .. }
+            | Heading1 { common, .. }
+            | Heading2 { common, .. }
+            | Heading3 { common, .. }
+            | BulletedListItem { common, .. }
+            | NumberedListItem { common, .. }
+            | ToDo { common, .. }
+            | Toggle { common, .. }
+            | ChildPage { common, .. } => &common.id,
+            Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
             }
         }
