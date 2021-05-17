@@ -76,6 +76,7 @@ impl Identifiable for Database {
     }
 }
 
+/// https://developers.notion.com/reference/pagination#responses
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct ListResponse<T> {
     pub results: Vec<T>,
