@@ -136,21 +136,6 @@ pub struct Page {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
-pub enum BlockType {
-    Paragraph,
-    Heading1,
-    Heading2,
-    Heading3,
-    BulletedListItem,
-    NumberedListItem,
-    ToDo,
-    Toggle,
-    ChildPage,
-    Unsupported,
-}
-
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct BlockCommon {
     id: BlockId,
     created_time: DateTime<Utc>,
@@ -233,7 +218,8 @@ pub enum Block {
         common: BlockCommon,
         child_page: ChildPageFields,
     },
-    Unsupported {},
+    #[serde(other)]
+    Unsupported,
 }
 
 impl Identifiable for Block {
@@ -241,36 +227,15 @@ impl Identifiable for Block {
 
     fn id(&self) -> &Self::Type {
         match self {
-            Block::Paragraph {
-                common,
-                paragraph: _,
-            } => &common.id,
-            Block::Heading1 {
-                common,
-                heading_1: _,
-            } => &common.id,
-            Block::Heading2 {
-                common,
-                heading_2: _,
-            } => &common.id,
-            Block::Heading3 {
-                common,
-                heading_3: _,
-            } => &common.id,
-            Block::BulletedListItem {
-                common,
-                bulleted_list_item: _,
-            } => &common.id,
-            Block::NumberedListItem {
-                common,
-                numbered_list_item: _,
-            } => &common.id,
-            Block::ToDo { common, to_do: _ } => &common.id,
-            Block::Toggle { common, toggle: _ } => &common.id,
-            Block::ChildPage {
-                common,
-                child_page: _,
-            } => &common.id,
+            Block::Paragraph { common, .. }
+            | Block::Heading1 { common, .. }
+            | Block::Heading2 { common, .. }
+            | Block::Heading3 { common, .. }
+            | Block::BulletedListItem { common, .. }
+            | Block::NumberedListItem { common, .. }
+            | Block::ToDo { common, .. }
+            | Block::Toggle { common, .. }
+            | Block::ChildPage { common, .. } => &common.id,
             Block::Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
             }
