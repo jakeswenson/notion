@@ -1,5 +1,5 @@
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Database, DatabaseId, ListResponse, Object, Page, Block, BlockId};
+use crate::models::{Block, BlockId, Database, DatabaseId, ListResponse, Object, Page};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use serde::de::DeserializeOwned;
@@ -130,14 +130,13 @@ impl NotionApi {
 
     pub async fn get_block_children<T: Identifiable<Type = BlockId>>(
         &self,
-        block_id: T
-    ) -> Result<ListResponse<Block>, NotionApiClientError> {
-        Ok(NotionApi::make_json_request(
-            self.client.get(&format!(
-                "https://api.notion.com/v1/blocks/{block_id}/children",
-                block_id = block_id.id()
-            ))
-        ).await?)
+        block_id: T,
+    ) -> Result<ListResponse<Block>, Error> {
+        Ok(NotionApi::make_json_request(self.client.get(&format!(
+            "https://api.notion.com/v1/blocks/{block_id}/children",
+            block_id = block_id.id()
+        )))
+        .await?)
     }
 }
 
@@ -147,8 +146,8 @@ mod tests {
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
     };
-    use crate::models::{Object, BlockId};
-    use crate::{NotionApi, Identifiable};
+    use crate::models::{BlockId, Object};
+    use crate::{Identifiable, NotionApi};
 
     fn test_token() -> String {
         let token = {
@@ -252,9 +251,12 @@ mod tests {
         println!("{:?}", search_response.results.len());
 
         for object in search_response.results {
-            let _block = match object {
-                Object::Page { page } => api.get_block_children(BlockId::from(page.id())).await.unwrap(),
-                _ => panic!("Should not have received anything but pages!")
+            match object {
+                Object::Page { page } => api
+                    .get_block_children(BlockId::from(page.id()))
+                    .await
+                    .unwrap(),
+                _ => panic!("Should not have received anything but pages!"),
             };
         }
 

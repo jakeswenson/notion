@@ -147,7 +147,7 @@ pub enum BlockType {
     ToDo,
     Toggle,
     ChildPage,
-    Unsupported
+    Unsupported,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -188,21 +188,21 @@ pub enum Block {
     Paragraph {
         #[serde(flatten)]
         common: BlockCommon,
-        paragraph: TextAndChildren
+        paragraph: TextAndChildren,
     },
-    #[serde(rename="heading_1")]
+    #[serde(rename = "heading_1")]
     Heading1 {
         #[serde(flatten)]
         common: BlockCommon,
         heading_1: Text,
     },
-    #[serde(rename="heading_2")]
+    #[serde(rename = "heading_2")]
     Heading2 {
         #[serde(flatten)]
         common: BlockCommon,
         heading_2: Text,
     },
-    #[serde(rename="heading_3")]
+    #[serde(rename = "heading_3")]
     Heading3 {
         #[serde(flatten)]
         common: BlockCommon,
@@ -233,7 +233,7 @@ pub enum Block {
         common: BlockCommon,
         child_page: ChildPageFields,
     },
-    Unsupported {}
+    Unsupported {},
 }
 
 impl Identifiable for Block {
@@ -241,18 +241,40 @@ impl Identifiable for Block {
 
     fn id(&self) -> &Self::Type {
         match self {
-            Block::Paragraph { common, paragraph: _ } => &common.id,
-            Block::Heading1 { common, heading_1: _} => &common.id,
-            Block::Heading2 { common, heading_2: _} => &common.id,
-            Block::Heading3 { common, heading_3: _} => &common.id,
-            Block::BulletedListItem { common, bulleted_list_item: _} => &common.id,
-            Block::NumberedListItem { common, numbered_list_item: _} => &common.id,
+            Block::Paragraph {
+                common,
+                paragraph: _,
+            } => &common.id,
+            Block::Heading1 {
+                common,
+                heading_1: _,
+            } => &common.id,
+            Block::Heading2 {
+                common,
+                heading_2: _,
+            } => &common.id,
+            Block::Heading3 {
+                common,
+                heading_3: _,
+            } => &common.id,
+            Block::BulletedListItem {
+                common,
+                bulleted_list_item: _,
+            } => &common.id,
+            Block::NumberedListItem {
+                common,
+                numbered_list_item: _,
+            } => &common.id,
             Block::ToDo { common, to_do: _ } => &common.id,
-            Block::Toggle { common, toggle: _} => &common.id,
-            Block::ChildPage { common, child_page: _} => &common.id,
-            Block::Unsupported {} => { panic!("Trying to reference identifier for unsupported block!") }
+            Block::Toggle { common, toggle: _ } => &common.id,
+            Block::ChildPage {
+                common,
+                child_page: _,
+            } => &common.id,
+            Block::Unsupported {} => {
+                panic!("Trying to reference identifier for unsupported block!")
+            }
         }
-
     }
 }
 
@@ -270,7 +292,7 @@ impl Identifiable for Page {
 pub enum Object {
     Block {
         #[serde(flatten)]
-        block: Block
+        block: Block,
     },
     Database {
         #[serde(flatten)]
