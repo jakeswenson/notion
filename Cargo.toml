@@ -32,3 +32,9 @@ features = ["derive"]
 [dev-dependencies]
 cargo-husky = "1"
 wiremock = "0.5.2"
+anyhow = "1.0.40"
+clap = "3.0.0-beta.2"
+
+[dev-dependencies.config]
+version = "0.11.0"
+features = ["toml"]
