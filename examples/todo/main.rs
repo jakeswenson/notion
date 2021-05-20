@@ -38,7 +38,8 @@ async fn main() -> Result<()> {
 
     // https://docs.rs/config/0.11.0/config/
     let config = config::Config::default()
-        .with_merged(config::File::with_name("todo_config"))?
+        .with_merged(config::File::with_name("todo_config"))
+        .unwrap_or_default()
         .with_merged(config::Environment::with_prefix("NOTION"))?;
 
     let config: TodoConfig = config.try_into().context("Failed to read config")?;
