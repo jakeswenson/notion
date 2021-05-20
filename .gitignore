@@ -10,3 +10,4 @@ Cargo.lock
 **/*.rs.bk
 
 .api_token
+todo_config.toml

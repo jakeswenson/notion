@@ -1,8 +1,10 @@
+mod commands;
+
 use anyhow::{Context, Result};
 use clap::Clap;
 use notion::models::DatabaseId;
 use notion::NotionApi;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 // https://docs.rs/clap/3.0.0-beta.2/clap/
 #[derive(Clap)]
@@ -24,13 +26,14 @@ enum SubCommand {
     Check,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct TodoConfig {
     api_token: Option<String>,
     task_database_id: Option<DatabaseId>,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
 
     // https://docs.rs/config/0.11.0/config/
@@ -52,25 +55,21 @@ fn main() -> Result<()> {
     )?;
 
     match opts.command {
-        SubCommand::Config => configure(notion_api),
+        SubCommand::Config => commands::configure::configure(notion_api).await,
         SubCommand::List => list_tasks(notion_api),
         SubCommand::Add => add_task(notion_api),
         SubCommand::Check => complete_task(notion_api),
     }
 }
 
-fn configure(notion_api: NotionApi) -> Result<()> {
+fn list_tasks(_notion_api: NotionApi) -> Result<()> {
     Ok(())
 }
 
-fn list_tasks(notion_api: NotionApi) -> Result<()> {
+fn add_task(_notion_api: NotionApi) -> Result<()> {
     Ok(())
 }
 
-fn add_task(notion_api: NotionApi) -> Result<()> {
-    Ok(())
-}
-
-fn complete_task(notion_api: NotionApi) -> Result<()> {
+fn complete_task(_notion_api: NotionApi) -> Result<()> {
     Ok(())
 }

@@ -66,6 +66,15 @@ impl AsIdentifier<DatabaseId> for Database {
     }
 }
 
+impl Database {
+    pub fn title_plain_text(&self) -> String {
+        self.title
+            .iter()
+            .flat_map(|rich_text| rich_text.plain_text().chars())
+            .collect()
+    }
+}
+
 /// https://developers.notion.com/reference/pagination#responses
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct ListResponse<T> {
