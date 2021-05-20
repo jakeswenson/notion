@@ -1,28 +1,14 @@
 use crate::TodoConfig;
 use anyhow::Result;
-use notion::models::search::{FilterProperty, FilterValue, NotionSearch};
-use notion::models::{Database, Object};
+use notion::models::search::NotionSearch;
+use notion::models::{Database, DatabaseId};
 use notion::{AsIdentifier, NotionApi};
 use skim::{Skim, SkimItem, SkimItemReceiver, SkimItemSender, SkimOptions};
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::Arc;
 
-pub async fn configure(notion_api: NotionApi) -> Result<()> {
-    let databases: Vec<Database> = notion_api
-        .search(NotionSearch::Filter {
-            property: FilterProperty::Object,
-            value: FilterValue::Database,
-        })
-        .await?
-        .results
-        .into_iter()
-        .filter_map(|object| match object {
-            Object::Database { database } => Some(database),
-            _ => None,
-        })
-        .collect();
-
+fn skim_select_database(databases: Vec<Database>) -> Result<DatabaseId> {
     let options = SkimOptions::default();
 
     let (sender, receiver): (SkimItemSender, SkimItemReceiver) = crossbeam_channel::bounded(500);
@@ -58,6 +44,18 @@ pub async fn configure(notion_api: NotionApi) -> Result<()> {
         .expect("Couldn't cast back to SkimDB");
 
     let database_id = db.db.id();
+
+    Ok(database_id)
+}
+
+pub async fn configure(notion_api: NotionApi) -> Result<()> {
+    let databases: Vec<Database> = notion_api
+        .search(NotionSearch::filter_by_databases())
+        .await?
+        .only_databases()
+        .results;
+
+    let database_id = skim_select_database(databases)?;
 
     println!("Selected database's id: {}", database_id);
 

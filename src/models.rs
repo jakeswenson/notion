@@ -89,6 +89,25 @@ impl<T> ListResponse<T> {
     }
 }
 
+impl ListResponse<Object> {
+    pub fn only_databases(self) -> ListResponse<Database> {
+        let databases = self
+            .results
+            .into_iter()
+            .filter_map(|object| match object {
+                Object::Database { database } => Some(database),
+                _ => None,
+            })
+            .collect();
+
+        ListResponse {
+            results: databases,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        }
+    }
+}
+
 /// A zero-cost wrapper type around a Page ID
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
 #[serde(transparent)]

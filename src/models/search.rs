@@ -310,6 +310,15 @@ pub enum NotionSearch {
     },
 }
 
+impl NotionSearch {
+    pub fn filter_by_databases() -> Self {
+        Self::Filter {
+            property: FilterProperty::Object,
+            value: FilterValue::Database,
+        }
+    }
+}
+
 impl From<NotionSearch> for SearchRequest {
     fn from(search: NotionSearch) -> Self {
         match search {
