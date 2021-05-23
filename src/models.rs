@@ -66,6 +66,15 @@ impl AsIdentifier<DatabaseId> for Database {
     }
 }
 
+impl Database {
+    pub fn title_plain_text(&self) -> String {
+        self.title
+            .iter()
+            .flat_map(|rich_text| rich_text.plain_text().chars())
+            .collect()
+    }
+}
+
 /// https://developers.notion.com/reference/pagination#responses
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct ListResponse<T> {
@@ -77,6 +86,25 @@ pub struct ListResponse<T> {
 impl<T> ListResponse<T> {
     pub fn results(&self) -> &[T] {
         &self.results
+    }
+}
+
+impl ListResponse<Object> {
+    pub fn only_databases(self) -> ListResponse<Database> {
+        let databases = self
+            .results
+            .into_iter()
+            .filter_map(|object| match object {
+                Object::Database { database } => Some(database),
+                _ => None,
+            })
+            .collect();
+
+        ListResponse {
+            results: databases,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        }
     }
 }
 

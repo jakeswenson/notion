@@ -81,3 +81,14 @@ pub enum RichText {
         rich_text: RichTextCommon,
     },
 }
+
+impl RichText {
+    pub fn plain_text(&self) -> &str {
+        use RichText::*;
+        match self {
+            Text { rich_text, .. } | Mention { rich_text, .. } | Equation { rich_text, .. } => {
+                &rich_text.plain_text
+            }
+        }
+    }
+}

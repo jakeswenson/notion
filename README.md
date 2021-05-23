@@ -4,3 +4,11 @@
 
 Notion API client library for rust.
 
+This project is under active development and this README will be updated as this library gets closer to a reliable state.
+However, if you're really eager see the example todo cli application provided in [examples/todo](examples/todo).
+
+## Building
+
+```bash
+cargo build
+```
