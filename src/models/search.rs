@@ -299,13 +299,24 @@ pub struct DatabaseQuery {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum NotionSearch {
+    /// When supplied, limits which pages are returned by comparing the query to the page title.
     Query(String),
+    /// When supplied, sorts the results based on the provided criteria.
+    ///
+    /// Limitation: Currently only a single sort is allowed and is limited to `last_edited_time`
     Sort {
         timestamp: SortTimestamp,
         direction: SortDirection,
     },
+    /// When supplied, filters the results based on the provided criteria.
+    ///
+    /// Limitation: Currently the only filter allowed is `object` which will filter by type of object (either page or database)
     Filter {
+        /// The name of the property to filter by.
+        /// Currently the only property you can filter by is the `object` type.
         property: FilterProperty,
+        /// The value of the property to filter the results by.
+        /// Possible values for object type include `page` or `database`.
         value: FilterValue,
     },
 }

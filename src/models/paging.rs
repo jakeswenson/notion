@@ -7,7 +7,7 @@ pub struct PagingCursor(String);
 #[derive(Serialize, Debug, Eq, PartialEq, Default)]
 pub struct Paging {
     #[serde(skip_serializing_if = "Option::is_none")]
-    start_cursor: Option<PagingCursor>,
+    pub start_cursor: Option<PagingCursor>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    page_size: Option<u8>,
+    pub page_size: Option<u8>,
 }
