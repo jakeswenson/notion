@@ -39,17 +39,17 @@ impl Display for DatabaseId {
 }
 
 /// Represents a Notion Database
-/// See https://developers.notion.com/reference/database
+/// See <https://developers.notion.com/reference/database>
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Database {
     /// Unique identifier for the database.
-    id: DatabaseId,
+    pub id: DatabaseId,
     /// Date and time when this database was created.
-    created_time: DateTime<Utc>,
+    pub created_time: DateTime<Utc>,
     /// Date and time when this database was updated.
-    last_edited_time: DateTime<Utc>,
+    pub last_edited_time: DateTime<Utc>,
     /// Name of the database as it appears in Notion.
-    title: Vec<RichText>,
+    pub title: Vec<RichText>,
     /// Schema of properties for the database as they appear in Notion.
     //
     // key string
@@ -57,7 +57,7 @@ pub struct Database {
     //
     // value object
     // A Property object.
-    properties: HashMap<String, PropertyConfiguration>,
+    pub properties: HashMap<String, PropertyConfiguration>,
 }
 
 impl AsIdentifier<DatabaseId> for Database {
@@ -75,7 +75,7 @@ impl Database {
     }
 }
 
-/// https://developers.notion.com/reference/pagination#responses
+/// <https://developers.notion.com/reference/pagination#responses>
 #[derive(Serialize, Deserialize, Eq, PartialEq, Debug, Clone)]
 pub struct ListResponse<T> {
     pub results: Vec<T>,
@@ -137,51 +137,51 @@ pub enum Parent {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Properties {
     #[serde(flatten)]
-    properties: HashMap<String, PropertyValue>,
+    pub properties: HashMap<String, PropertyValue>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Page {
-    id: PageId,
+    pub id: PageId,
     /// Date and time when this page was created.
-    created_time: DateTime<Utc>,
+    pub created_time: DateTime<Utc>,
     /// Date and time when this page was updated.
-    last_edited_time: DateTime<Utc>,
+    pub last_edited_time: DateTime<Utc>,
     /// The archived status of the page.
-    archived: bool,
-    properties: Properties,
-    parent: Parent,
+    pub archived: bool,
+    pub properties: Properties,
+    pub parent: Parent,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct BlockCommon {
-    id: BlockId,
-    created_time: DateTime<Utc>,
-    last_edited_time: DateTime<Utc>,
-    has_children: bool,
+    pub id: BlockId,
+    pub created_time: DateTime<Utc>,
+    pub last_edited_time: DateTime<Utc>,
+    pub has_children: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct TextAndChildren {
-    text: Vec<RichText>,
-    children: Option<Vec<Block>>,
+    pub text: Vec<RichText>,
+    pub children: Option<Vec<Block>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Text {
-    text: Vec<RichText>,
+    pub text: Vec<RichText>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ToDoFields {
-    text: Vec<RichText>,
-    checked: bool,
-    children: Option<Vec<Block>>,
+    pub text: Vec<RichText>,
+    pub checked: bool,
+    pub children: Option<Vec<Block>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ChildPageFields {
-    title: String,
+    pub title: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -339,19 +339,19 @@ impl UserId {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UserCommon {
-    id: UserId,
-    name: Option<String>,
-    avatar_url: Option<String>,
+    pub id: UserId,
+    pub name: Option<String>,
+    pub avatar_url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Person {
-    email: String,
+    pub email: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Bot {
-    email: String,
+    pub email: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -371,7 +371,7 @@ pub enum User {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::{ListResponse, Page};
+    use crate::models::{ListResponse, Object, Page};
 
     #[test]
     fn deserialize_page() {
@@ -382,5 +382,11 @@ mod tests {
     fn deserialize_query_result() {
         let _page: ListResponse<Page> =
             serde_json::from_str(include_str!("models/tests/query_result.json")).unwrap();
+    }
+
+    #[test]
+    fn deserialize_number_format() {
+        let _search_results: ListResponse<Object> =
+            serde_json::from_str(include_str!("models/tests/issue_15.json")).unwrap();
     }
 }

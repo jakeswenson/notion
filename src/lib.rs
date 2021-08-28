@@ -94,7 +94,7 @@ impl NotionApi {
     }
 
     /// Search all pages in notion.
-    /// Query: can either be a [SearchRequest] or a
+    /// `query` can either be a [SearchRequest] or a slightly more convenient
     /// [NotionSearch](models::search::NotionSearch) query.
     pub async fn search<T: Into<SearchRequest>>(
         &self,
