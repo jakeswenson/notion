@@ -36,6 +36,7 @@ pub trait AsIdentifier<ById> {
 
 /// An API client for Notion.
 /// Create a client by using [new(api_token: String)](Self::new()).
+#[derive(Clone)]
 pub struct NotionApi {
     client: Client,
 }
