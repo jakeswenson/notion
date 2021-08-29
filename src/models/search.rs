@@ -1,5 +1,6 @@
+use crate::ids::{PageId, UserId};
 use crate::models::paging::Paging;
-use crate::models::{Number, PageId, UserId};
+use crate::models::Number;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
@@ -281,8 +282,10 @@ pub struct DatabaseSort {
     // Todo: Should property and timestamp be mutually exclusive? (i.e a flattened enum?)
     //  the documentation is not clear:
     //  https://developers.notion.com/reference/post-database-query#post-database-query-sort
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub property: Option<String>,
     /// The name of the timestamp to sort against.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<DatabaseSortTimestamp>,
     pub direction: SortDirection,
 }

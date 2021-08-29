@@ -1,41 +1,28 @@
+pub mod error;
 pub mod paging;
 pub mod properties;
 pub mod search;
 pub mod text;
+pub mod users;
 
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
 use crate::models::text::RichText;
+use crate::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
+use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
-use crate::AsIdentifier;
+use crate::models::users::User;
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
-use std::fmt::{Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 enum ObjectType {
     Database,
     List,
-}
-
-/// A zero-cost wrapper type around a Database ID
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
-#[serde(transparent)]
-pub struct DatabaseId(String);
-
-impl DatabaseId {
-    pub fn id(&self) -> &str {
-        &self.0
-    }
-}
-
-impl Display for DatabaseId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
 }
 
 /// Represents a Notion Database
@@ -61,8 +48,8 @@ pub struct Database {
 }
 
 impl AsIdentifier<DatabaseId> for Database {
-    fn id(&self) -> DatabaseId {
-        self.id.clone()
+    fn as_id(&self) -> &DatabaseId {
+        &self.id
     }
 }
 
@@ -106,16 +93,56 @@ impl ListResponse<Object> {
             next_cursor: self.next_cursor,
         }
     }
-}
 
-/// A zero-cost wrapper type around a Page ID
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
-#[serde(transparent)]
-pub struct PageId(String);
+    pub(crate) fn expect_databases(self) -> Result<ListResponse<Database>, crate::Error> {
+        let databases: Result<Vec<_>, _> = self
+            .results
+            .into_iter()
+            .map(|object| match object {
+                Object::Database { database } => Ok(database),
+                response => Err(Error::UnexpectedResponse { response }),
+            })
+            .collect();
 
-impl PageId {
-    pub fn id(&self) -> &str {
-        &self.0
+        Ok(ListResponse {
+            results: databases?,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        })
+    }
+
+    pub(crate) fn expect_pages(self) -> Result<ListResponse<Page>, crate::Error> {
+        let items: Result<Vec<_>, _> = self
+            .results
+            .into_iter()
+            .map(|object| match object {
+                Object::Page { page } => Ok(page),
+                response => Err(Error::UnexpectedResponse { response }),
+            })
+            .collect();
+
+        Ok(ListResponse {
+            results: items?,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        })
+    }
+
+    pub(crate) fn expect_blocks(self) -> Result<ListResponse<Block>, crate::Error> {
+        let items: Result<Vec<_>, _> = self
+            .results
+            .into_iter()
+            .map(|object| match object {
+                Object::Block { block } => Ok(block),
+                response => Err(Error::UnexpectedResponse { response }),
+            })
+            .collect();
+
+        Ok(ListResponse {
+            results: items?,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        })
     }
 }
 
@@ -241,7 +268,7 @@ pub enum Block {
 }
 
 impl AsIdentifier<BlockId> for Block {
-    fn id(&self) -> BlockId {
+    fn as_id(&self) -> &BlockId {
         use Block::*;
         match self {
             Paragraph { common, .. }
@@ -252,7 +279,7 @@ impl AsIdentifier<BlockId> for Block {
             | NumberedListItem { common, .. }
             | ToDo { common, .. }
             | Toggle { common, .. }
-            | ChildPage { common, .. } => common.id.clone(),
+            | ChildPage { common, .. } => &common.id,
             Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
             }
@@ -261,14 +288,8 @@ impl AsIdentifier<BlockId> for Block {
 }
 
 impl AsIdentifier<PageId> for Page {
-    fn id(&self) -> PageId {
-        self.id.clone()
-    }
-}
-
-impl AsIdentifier<BlockId> for Page {
-    fn id(&self) -> BlockId {
-        self.id.clone().into()
+    fn as_id(&self) -> &PageId {
+        &self.id
     }
 }
 
@@ -296,77 +317,16 @@ pub enum Object {
         #[serde(flatten)]
         user: User,
     },
-}
-
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
-#[serde(transparent)]
-pub struct BlockId(String);
-
-impl BlockId {
-    pub fn id(&self) -> &str {
-        &self.0
-    }
-}
-
-impl From<PageId> for BlockId {
-    fn from(page_id: PageId) -> Self {
-        BlockId(page_id.0)
-    }
-}
-
-impl Display for BlockId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
+    Error {
+        #[serde(flatten)]
+        error: ErrorResponse,
+    },
 }
 
 impl Object {
     pub fn is_database(&self) -> bool {
         matches!(self, Object::Database { .. })
     }
-}
-
-/// A zero-cost wrapper type around a Page ID
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
-#[serde(transparent)]
-pub struct UserId(String);
-
-impl UserId {
-    pub fn id(&self) -> &str {
-        &self.0
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct UserCommon {
-    pub id: UserId,
-    pub name: Option<String>,
-    pub avatar_url: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct Person {
-    pub email: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct Bot {
-    pub email: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(tag = "type")]
-pub enum User {
-    Person {
-        #[serde(flatten)]
-        common: UserCommon,
-        person: Person,
-    },
-    Bot {
-        #[serde(flatten)]
-        common: UserCommon,
-        bot: Bot,
-    },
 }
 
 #[cfg(test)]

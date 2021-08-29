@@ -1,37 +1,46 @@
+use crate::ids::{BlockId, DatabaseId};
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Block, BlockId, Database, DatabaseId, ListResponse, Object, Page};
+use crate::models::{Block, Database, ListResponse, Object, Page};
+use ids::AsIdentifier;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
-use serde::de::DeserializeOwned;
-use snafu::{ResultExt, Snafu};
 
+pub mod ids;
 pub mod models;
 
-const NOTION_API_VERSION: &str = "2021-05-13";
+use crate::models::error::ErrorResponse;
+pub use chrono;
+
+const NOTION_API_VERSION: &str = "2021-08-16";
 
 /// An wrapper Error type for all errors produced by the [`NotionApi`](NotionApi) client.
-#[derive(Debug, Snafu)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[snafu(display("Invalid Notion API Token: {}", source))]
+    #[error("Invalid Notion API Token: {}", source)]
     InvalidApiToken {
         source: reqwest::header::InvalidHeaderValue,
     },
-    #[snafu(display("Unable to build reqwest HTTP client: {}", source))]
+
+    #[error("Unable to build reqwest HTTP client: {}", source)]
     ErrorBuildingClient { source: reqwest::Error },
-    #[snafu(display("Error sending HTTP request: {}", source))]
-    RequestFailed { source: reqwest::Error },
 
-    #[snafu(display("Error reading response: {}", source))]
-    ResponseError { source: reqwest::Error },
+    #[error("Error sending HTTP request: {}", source)]
+    RequestFailed {
+        #[from]
+        source: reqwest::Error,
+    },
 
-    #[snafu(display("Error parsing json response: {}", source))]
+    #[error("Error reading response: {}", source)]
+    ResponseIoError { source: reqwest::Error },
+
+    #[error("Error parsing json response: {}", source)]
     JsonParseError { source: serde_json::Error },
-}
 
-/// Meant to be a helpful trait allowing anything that can be
-/// identified by the type specified in `ById`.
-pub trait AsIdentifier<ById> {
-    fn id(&self) -> ById;
+    #[error("Unexpected API Response")]
+    UnexpectedResponse { response: Object },
+
+    #[error("API Error {}({}): {}", .error.code, .error.status, .error.message)]
+    ApiError { error: ErrorResponse },
 }
 
 /// An API client for Notion.
@@ -51,37 +60,48 @@ impl NotionApi {
             HeaderValue::from_static(NOTION_API_VERSION),
         );
 
-        let mut auth_value =
-            HeaderValue::from_str(&format!("Bearer {}", api_token)).context(InvalidApiToken)?;
+        let mut auth_value = HeaderValue::from_str(&format!("Bearer {}", api_token))
+            .map_err(|source| Error::InvalidApiToken { source })?;
         auth_value.set_sensitive(true);
         headers.insert(header::AUTHORIZATION, auth_value);
 
         let client = ClientBuilder::new()
             .default_headers(headers)
             .build()
-            .context(ErrorBuildingClient)?;
+            .map_err(|source| Error::ErrorBuildingClient { source })?;
 
         Ok(Self { client })
     }
 
-    async fn make_json_request<T>(request: RequestBuilder) -> Result<T, Error>
-    where
-        T: DeserializeOwned,
-    {
-        let json = request
-            .send()
+    async fn make_json_request(&self, request: RequestBuilder) -> Result<Object, Error> {
+        let request = request.build()?;
+        let url = request.url();
+        tracing::trace!(
+            method = request.method().as_str(),
+            url = url.as_str(),
+            "Sending request"
+        );
+        let json = self
+            .client
+            .execute(request)
             .await
-            .context(RequestFailed)?
+            .map_err(|source| Error::RequestFailed { source })?
             .text()
             .await
-            .context(ResponseError)?;
+            .map_err(|source| Error::ResponseIoError { source })?;
+
+        tracing::debug!("JSON Response: {}", json);
         #[cfg(test)]
         {
-            println!("JSON: {}", json);
-            dbg!(serde_json::from_str::<serde_json::Value>(&json).context(JsonParseError)?);
+            dbg!(serde_json::from_str::<serde_json::Value>(&json)
+                .map_err(|source| Error::JsonParseError { source })?);
         }
-        let result = serde_json::from_str(&json).context(JsonParseError)?;
-        Ok(result)
+        let result =
+            serde_json::from_str(&json).map_err(|source| Error::JsonParseError { source })?;
+        match result {
+            Object::Error { error } => Err(Error::ApiError { error }),
+            response => Ok(response),
+        }
     }
 
     /// List all the databases shared with the supplied integration token.
@@ -90,7 +110,10 @@ impl NotionApi {
     pub async fn list_databases(&self) -> Result<ListResponse<Database>, Error> {
         let builder = self.client.get("https://api.notion.com/v1/databases");
 
-        Ok(NotionApi::make_json_request(builder).await?)
+        match self.make_json_request(builder).await? {
+            Object::List { list } => Ok(list.expect_databases()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
     }
 
     /// Search all pages in notion.
@@ -100,12 +123,18 @@ impl NotionApi {
         &self,
         query: T,
     ) -> Result<ListResponse<Object>, Error> {
-        Ok(NotionApi::make_json_request(
-            self.client
-                .post("https://api.notion.com/v1/search")
-                .json(&query.into()),
-        )
-        .await?)
+        let result = self
+            .make_json_request(
+                self.client
+                    .post("https://api.notion.com/v1/search")
+                    .json(&query.into()),
+            )
+            .await?;
+
+        match result {
+            Object::List { list } => Ok(list),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
     }
 
     /// Get a database by [DatabaseId].
@@ -113,11 +142,17 @@ impl NotionApi {
         &self,
         database_id: T,
     ) -> Result<Database, Error> {
-        Ok(NotionApi::make_json_request(self.client.get(format!(
-            "https://api.notion.com/v1/databases/{}",
-            database_id.id().id()
-        )))
-        .await?)
+        let result = self
+            .make_json_request(self.client.get(format!(
+                "https://api.notion.com/v1/databases/{}",
+                database_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::Database { database } => Ok(database),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
     }
 
     /// Query a database and return the matching pages.
@@ -130,31 +165,43 @@ impl NotionApi {
         T: Into<DatabaseQuery>,
         D: AsIdentifier<DatabaseId>,
     {
-        Ok(NotionApi::make_json_request(
-            self.client
-                .post(&format!(
-                    "https://api.notion.com/v1/databases/{database_id}/query",
-                    database_id = database.id()
-                ))
-                .json(&query.into()),
-        )
-        .await?)
+        let result = self
+            .make_json_request(
+                self.client
+                    .post(&format!(
+                        "https://api.notion.com/v1/databases/{database_id}/query",
+                        database_id = database.as_id()
+                    ))
+                    .json(&query.into()),
+            )
+            .await?;
+        match result {
+            Object::List { list } => Ok(list.expect_pages()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
     }
 
     pub async fn get_block_children<T: AsIdentifier<BlockId>>(
         &self,
         block_id: T,
     ) -> Result<ListResponse<Block>, Error> {
-        Ok(NotionApi::make_json_request(self.client.get(&format!(
-            "https://api.notion.com/v1/blocks/{block_id}/children",
-            block_id = block_id.id()
-        )))
-        .await?)
+        let result = self
+            .make_json_request(self.client.get(&format!(
+                "https://api.notion.com/v1/blocks/{block_id}/children",
+                block_id = block_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::ids::BlockId;
     use crate::models::search::PropertyCondition::Text;
     use crate::models::search::{
         DatabaseQuery, FilterCondition, FilterProperty, FilterValue, NotionSearch, TextCondition,
@@ -176,6 +223,7 @@ mod tests {
     }
 
     fn test_client() -> NotionApi {
+        std::env::set_var("RUST_LOG", "notion");
         NotionApi::new(test_token()).unwrap()
     }
 
@@ -265,7 +313,10 @@ mod tests {
 
         for object in search_response.results {
             match object {
-                Object::Page { page } => api.get_block_children(page).await.unwrap(),
+                Object::Page { page } => api
+                    .get_block_children(BlockId::from(page.id))
+                    .await
+                    .unwrap(),
                 _ => panic!("Should not have received anything but pages!"),
             };
         }

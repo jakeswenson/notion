@@ -1,8 +1,9 @@
 use crate::TodoConfig;
 use anyhow::Result;
+use notion::ids::{AsIdentifier, DatabaseId};
 use notion::models::search::NotionSearch;
-use notion::models::{Database, DatabaseId};
-use notion::{AsIdentifier, NotionApi};
+use notion::models::Database;
+use notion::NotionApi;
 use skim::{Skim, SkimItem, SkimItemReceiver, SkimItemSender, SkimOptions};
 use std::borrow::Cow;
 use std::ops::Deref;
@@ -43,9 +44,9 @@ fn skim_select_database(databases: Vec<Database>) -> Result<DatabaseId> {
         .downcast_ref()
         .expect("Couldn't cast back to SkimDB");
 
-    let database_id = db.db.id();
+    let database_id = db.db.as_id();
 
-    Ok(database_id)
+    Ok(database_id.clone())
 }
 
 pub async fn configure(notion_api: NotionApi) -> Result<()> {

@@ -2,13 +2,13 @@ mod commands;
 
 use anyhow::{Context, Result};
 use clap::Clap;
-use notion::models::DatabaseId;
+use notion::ids::DatabaseId;
 use notion::NotionApi;
 use serde::{Deserialize, Serialize};
 
-// https://docs.rs/clap/3.0.0-beta.2/clap/
+// From <https://docs.rs/clap/3.0.0-beta.2/clap/>
 #[derive(Clap)]
-#[clap(version = "1.0", author = "Kevin K. <kbknapp@gmail.com>")]
+#[clap(version = "1.0", author = "Jake Swenson")]
 struct Opts {
     #[clap(subcommand)]
     command: SubCommand,

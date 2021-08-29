@@ -1,12 +1,15 @@
 use crate::models::text::RichText;
-use crate::models::{DatabaseId, PageId, User};
-use serde::{Deserialize, Serialize};
+use crate::models::users::User;
 
 use super::{DateTime, Number, Utc};
+use crate::ids::{DatabaseId, PageId, PropertyId};
+use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone)]
-#[serde(transparent)]
-pub struct PropertyId(String);
+pub mod formulas;
+
+#[cfg(test)]
+mod tests;
 
 /// How the number is displayed in Notion.
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Copy, Clone, Hash)]
@@ -179,7 +182,7 @@ pub enum PropertyConfiguration {
     /// See <https://developers.notion.com/reference/database#created-by-configuration>
     CreatedBy { id: PropertyId },
     /// See <https://developers.notion.com/reference/database#last-edited-time-configuration>
-    LastEditTime { id: PropertyId },
+    LastEditedTime { id: PropertyId },
     /// See <https://developers.notion.com/reference/database#last-edited-by-configuration>
     LastEditBy { id: PropertyId },
 }
@@ -192,11 +195,16 @@ pub struct SelectedValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(untagged)]
+pub enum DateOrDateTime {
+    Date(NaiveDate),
+    DateTime(DateTime<Utc>),
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct DateValue {
-    // Todo: Will this work with dates (without time)?
-    //       does there need to be an enum of Date|DateTime?
-    pub start: DateTime<Utc>,
-    pub end: Option<DateTime<Utc>>,
+    pub start: DateOrDateTime,
+    pub end: Option<DateOrDateTime>,
 }
 
 /// Formula property value objects represent the result of evaluating a formula
@@ -205,10 +213,10 @@ pub struct DateValue {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum FormulaResultValue {
-    String(#[serde(rename = "string")] Option<String>),
-    Number(#[serde(rename = "number")] Option<Number>),
-    Boolean(#[serde(rename = "boolean")] Option<bool>),
-    Date(#[serde(rename = "date")] Option<DateTime<Utc>>),
+    String { string: Option<String> },
+    Number { number: Option<Number> },
+    Boolean { boolean: Option<bool> },
+    Date { date: Option<DateValue> },
 }
 
 /// Relation property value objects contain an array of page references within the relation property.
@@ -260,11 +268,11 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/page#select-property-values>
     Select {
         id: PropertyId,
-        select: SelectedValue,
+        select: Option<SelectedValue>,
     },
     MultiSelect {
         id: PropertyId,
-        multi_select: Vec<SelectedValue>,
+        multi_select: Option<Vec<SelectedValue>>,
     },
     Date {
         id: PropertyId,
@@ -290,7 +298,7 @@ pub enum PropertyValue {
     },
     Files {
         id: PropertyId,
-        files: Vec<FileReference>,
+        files: Option<Vec<FileReference>>,
     },
     Checkbox {
         id: PropertyId,
