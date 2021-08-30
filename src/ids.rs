@@ -19,6 +19,15 @@ where
     }
 }
 
+impl<T> AsIdentifier<T> for &T
+where
+    T: Identifier,
+{
+    fn as_id(&self) -> &T {
+        self
+    }
+}
+
 macro_rules! identifer {
     ($name:ident) => {
         #[derive(serde::Serialize, serde::Deserialize, Debug, Eq, PartialEq, Hash, Clone)]

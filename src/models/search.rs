@@ -1,5 +1,5 @@
 use crate::ids::{PageId, UserId};
-use crate::models::paging::Paging;
+use crate::models::paging::{Pageable, Paging};
 use crate::models::Number;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeMap;
@@ -290,7 +290,7 @@ pub struct DatabaseSort {
     pub direction: SortDirection,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Default)]
+#[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct DatabaseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sorts: Option<Vec<DatabaseSort>>,
@@ -298,6 +298,15 @@ pub struct DatabaseQuery {
     pub filter: Option<FilterCondition>,
     #[serde(flatten)]
     pub paging: Option<Paging>,
+}
+
+impl Pageable for DatabaseQuery {
+    fn start_from(self, starting_point: Paging) -> Self {
+        DatabaseQuery {
+            paging: Some(starting_point),
+            ..self
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]

@@ -5,6 +5,7 @@ use crate::models::{Block, Database, ListResponse, Object, Page};
 use ids::AsIdentifier;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
+use tracing::Instrument;
 
 pub mod ids;
 pub mod models;
@@ -86,9 +87,11 @@ impl NotionApi {
         let json = self
             .client
             .execute(request)
+            .instrument(tracing::trace_span!("Sending request"))
             .await
             .map_err(|source| Error::RequestFailed { source })?
             .text()
+            .instrument(tracing::trace_span!("Reading response"))
             .await
             .map_err(|source| Error::ResponseIoError { source })?;
 
@@ -100,6 +103,7 @@ impl NotionApi {
         }
         let result =
             serde_json::from_str(&json).map_err(|source| Error::JsonParseError { source })?;
+
         match result {
             Object::Error { error } => Err(Error::ApiError { error }),
             response => Ok(response),
