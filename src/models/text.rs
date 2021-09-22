@@ -45,7 +45,7 @@ pub struct RichTextCommon {
     pub annotations: Option<Annotations>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Link {
     pub url: String,
 }
@@ -53,7 +53,7 @@ pub struct Link {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Text {
     pub content: String,
-    pub link: Option<String>,
+    pub link: Option<Link>,
 }
 
 /// Rich text objects contain data for displaying formatted text, mentions, and equations.

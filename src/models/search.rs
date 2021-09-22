@@ -1,5 +1,5 @@
 use crate::ids::{PageId, UserId};
-use crate::models::paging::{Pageable, Paging};
+use crate::models::paging::{Pageable, Paging, PagingCursor};
 use crate::models::Number;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeMap;
@@ -301,9 +301,12 @@ pub struct DatabaseQuery {
 }
 
 impl Pageable for DatabaseQuery {
-    fn start_from(self, starting_point: Paging) -> Self {
+    fn start_from(self, starting_point: Option<PagingCursor>) -> Self {
         DatabaseQuery {
-            paging: Some(starting_point),
+            paging: Some(Paging {
+                start_cursor: starting_point,
+                page_size: self.paging.and_then(|p| p.page_size),
+            }),
             ..self
         }
     }

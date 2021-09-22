@@ -263,7 +263,7 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/page#number-property-values>
     Number {
         id: PropertyId,
-        number: Number,
+        number: Option<Number>,
     },
     /// <https://developers.notion.com/reference/page#select-property-values>
     Select {
@@ -276,7 +276,7 @@ pub enum PropertyValue {
     },
     Date {
         id: PropertyId,
-        date: DateValue,
+        date: Option<DateValue>,
     },
     /// <https://developers.notion.com/reference/page#formula-property-values>
     Formula {
@@ -290,7 +290,7 @@ pub enum PropertyValue {
     },
     Rollup {
         id: PropertyId,
-        relation: Rollup,
+        relation: Option<Rollup>,
     },
     People {
         id: PropertyId,
@@ -310,7 +310,7 @@ pub enum PropertyValue {
     },
     Email {
         id: PropertyId,
-        email: String,
+        email: Option<String>,
     },
     PhoneNumber {
         id: PropertyId,

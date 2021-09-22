@@ -26,3 +26,9 @@ fn parse_select_property() {
     let _property: PropertyValue =
         serde_json::from_str(include_str!("tests/select_property.json")).unwrap();
 }
+
+#[test]
+fn parse_text_property_with_link() {
+    let _property: PropertyValue =
+        serde_json::from_str(include_str!("tests/text_with_link.json")).unwrap();
+}
