@@ -1,6 +1,6 @@
 use crate::ids::{BlockId, DatabaseId};
 use crate::models::error::ErrorResponse;
-use crate::models::search::{DatabaseQuery, SearchRequest};
+use crate::models::search::{DatabaseQuery, SearchRequest, Foo};
 use crate::models::{Block, Database, ListResponse, Object, Page};
 use ids::AsIdentifier;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -10,6 +10,7 @@ use tracing::Instrument;
 pub mod ids;
 pub mod models;
 pub use chrono;
+use serde::Serialize;
 
 #[cfg(test)]
 mod tests;
@@ -162,13 +163,14 @@ impl NotionApi {
     }
 
     /// Query a database and return the matching pages.
-    pub async fn query_database<D, T>(
+    pub async fn query_database<D, T, F>(
         &self,
         database: D,
         query: T,
     ) -> Result<ListResponse<Page>, Error>
     where
-        T: Into<DatabaseQuery>,
+        F: Foo + Serialize,
+        T: Into<DatabaseQuery<F>>,
         D: AsIdentifier<DatabaseId>,
     {
         let result = self

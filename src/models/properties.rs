@@ -286,7 +286,7 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/page#relation-property-values>
     Relation {
         id: PropertyId,
-        relation: RelationValue,
+        relation: Vec<RelationValue>,
     },
     Rollup {
         id: PropertyId,
@@ -306,7 +306,7 @@ pub enum PropertyValue {
     },
     Url {
         id: PropertyId,
-        url: String,
+        url: Option<String>,
     },
     Email {
         id: PropertyId,

@@ -263,12 +263,24 @@ pub enum PropertyCondition {
     And(Vec<PropertyCondition>),
 }
 
+pub trait Foo {}
+
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum CompoundFilter<T: Foo> {
+    And(Vec<T>),
+    Or(Vec<T>),
+}
+
 #[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 pub struct FilterCondition {
     pub property: String,
     #[serde(flatten)]
     pub condition: PropertyCondition,
 }
+
+impl <T: Foo> Foo for CompoundFilter<T>{}
+impl Foo for FilterCondition{}
 
 #[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -291,16 +303,16 @@ pub struct DatabaseSort {
 }
 
 #[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
-pub struct DatabaseQuery {
+pub struct DatabaseQuery<T: Foo> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sorts: Option<Vec<DatabaseSort>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filter: Option<FilterCondition>,
+    pub filter: Option<T>,
     #[serde(flatten)]
     pub paging: Option<Paging>,
 }
 
-impl Pageable for DatabaseQuery {
+impl <T: Foo> Pageable for DatabaseQuery<T> {
     fn start_from(self, starting_point: Option<PagingCursor>) -> Self {
         DatabaseQuery {
             paging: Some(Paging {
