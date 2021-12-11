@@ -103,6 +103,7 @@ pub enum RollupFunction {
     Min,
     Max,
     Range,
+    ShowOriginal
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -247,8 +248,9 @@ pub struct FileReference {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
+//#[serde(untagged)]
 #[serde(rename_all = "snake_case")]
-pub enum PropertyValue {
+pub enum PropertyValue { 
     // <https://developers.notion.com/reference/page#title-property-values>
     Title {
         id: PropertyId,
@@ -284,9 +286,10 @@ pub enum PropertyValue {
         formula: FormulaResultValue,
     },
     /// <https://developers.notion.com/reference/page#relation-property-values>
+    /// It is actually an array of relations
     Relation {
         id: PropertyId,
-        relation: RelationValue,
+        relation: Option<Vec<RelationValue>>
     },
     Rollup {
         id: PropertyId,
