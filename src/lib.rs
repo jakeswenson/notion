@@ -162,10 +162,7 @@ impl NotionApi {
     }
 
     /// Get a page by [PageId].
-    pub async fn get_page<T: AsIdentifier<PageId>>(
-        &self,
-        page_id: T,
-    ) -> Result<Page, Error> {
+    pub async fn get_page<T: AsIdentifier<PageId>>(&self, page_id: T) -> Result<Page, Error> {
         let result = self
             .make_json_request(self.client.get(format!(
                 "https://api.notion.com/v1/pages/{}",
