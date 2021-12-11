@@ -1,20 +1,20 @@
 mod commands;
 
 use anyhow::{Context, Result};
-use clap::Clap;
+use clap::Parser;
 use notion::ids::DatabaseId;
 use notion::NotionApi;
 use serde::{Deserialize, Serialize};
 
 // From <https://docs.rs/clap/3.0.0-beta.2/clap/>
-#[derive(Clap)]
+#[derive(Parser, Debug)]
 #[clap(version = "1.0", author = "Jake Swenson")]
 struct Opts {
     #[clap(subcommand)]
     command: SubCommand,
 }
 
-#[derive(Clap)]
+#[derive(Parser, Debug)]
 enum SubCommand {
     /// Configure what database this notion-todo example uses
     Config,
