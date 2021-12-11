@@ -103,6 +103,7 @@ pub enum RollupFunction {
     Min,
     Max,
     Range,
+    ShowOriginal,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -284,9 +285,10 @@ pub enum PropertyValue {
         formula: FormulaResultValue,
     },
     /// <https://developers.notion.com/reference/page#relation-property-values>
+    /// It is actually an array of relations
     Relation {
         id: PropertyId,
-        relation: RelationValue,
+        relation: Option<Vec<RelationValue>>,
     },
     Rollup {
         id: PropertyId,

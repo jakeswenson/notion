@@ -1,9 +1,9 @@
 use std::fmt::Display;
+use std::fmt::Error;
 
 pub trait Identifier: Display {
     fn value(&self) -> &str;
 }
-
 /// Meant to be a helpful trait allowing anything that can be
 /// identified by the type specified in `ById`.
 pub trait AsIdentifier<ById: Identifier> {
@@ -43,6 +43,14 @@ macro_rules! identifer {
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 self.0.fmt(f)
+            }
+        }
+
+        impl std::str::FromStr for $name {
+            type Err = Error;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                Ok($name(s.to_string()))
             }
         }
     };
