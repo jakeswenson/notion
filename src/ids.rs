@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::num::ParseIntError;
+use std::fmt::Error;
 
 pub trait Identifier: Display {
     fn value(&self) -> &str;
@@ -47,7 +47,7 @@ macro_rules! identifer {
         }
 
         impl std::str::FromStr for $name {
-            type Err = ParseIntError;
+            type Err = Error;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 Ok($name(s.to_string()))
