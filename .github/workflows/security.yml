@@ -3,7 +3,7 @@ name: Security Audits
 on:
   schedule:
     # Every Saturday at 1PM UTC (6AM PST)
-    chron: "0 13 * * 6"
+    - cron: "0 13 * * 6"
   pull_request:
     branches: [ main ]
 
