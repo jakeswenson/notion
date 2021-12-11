@@ -248,7 +248,6 @@ pub struct FileReference {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
-//#[serde(untagged)]
 #[serde(rename_all = "snake_case")]
 pub enum PropertyValue { 
     // <https://developers.notion.com/reference/page#title-property-values>
