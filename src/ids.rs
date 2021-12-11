@@ -28,11 +28,17 @@ where
     }
 }
 
-macro_rules! identifer {
+macro_rules! identifier {
     ($name:ident) => {
         #[derive(serde::Serialize, serde::Deserialize, Debug, Eq, PartialEq, Hash, Clone)]
         #[serde(transparent)]
         pub struct $name(String);
+
+        impl $name {
+            pub fn new(value: String) -> Self {
+                $name(value)
+            }
+        }
 
         impl Identifier for $name {
             fn value(&self) -> &str {
@@ -48,11 +54,11 @@ macro_rules! identifer {
     };
 }
 
-identifer!(DatabaseId);
-identifer!(PageId);
-identifer!(BlockId);
-identifer!(UserId);
-identifer!(PropertyId);
+identifier!(DatabaseId);
+identifier!(PageId);
+identifier!(BlockId);
+identifier!(UserId);
+identifier!(PropertyId);
 
 impl From<PageId> for BlockId {
     fn from(page_id: PageId) -> Self {
