@@ -312,7 +312,7 @@ pub enum PropertyValue {
     },
     Email {
         id: PropertyId,
-        email: Option<String>, // This can be null from my experience
+        email: Option<String>,
     },
     PhoneNumber {
         id: PropertyId,
