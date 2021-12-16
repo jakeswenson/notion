@@ -308,11 +308,11 @@ pub enum PropertyValue {
     },
     Url {
         id: PropertyId,
-        url: String,
+        url: Option<String>,
     },
     Email {
         id: PropertyId,
-        email: Option<String>,
+        email: Option<String>, // This can be null from my experience
     },
     PhoneNumber {
         id: PropertyId,
