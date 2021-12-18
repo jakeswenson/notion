@@ -308,7 +308,7 @@ pub enum PropertyValue {
     },
     Url {
         id: PropertyId,
-        url: String,
+        url: Option<String>,
     },
     Email {
         id: PropertyId,
