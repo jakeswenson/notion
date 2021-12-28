@@ -229,14 +229,11 @@ pub struct RelationValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-#[serde(tag = "type")]
-#[serde(rename_all = "snake_case")]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum RollupValue {
-    Number(#[serde(rename = "number")] Option<Number>),
-    Date(#[serde(rename = "date")] Option<DateTime<Utc>>),
-    // Todo: these property values don't have id properties...
-    //       so this likely wont deserialize. would like to minimize duplicated code...
-    Array(#[serde(rename = "array")] Vec<PropertyValue>),
+    Number { number: Option<Number> },
+    Date { date: Option<DateTime<Utc>> },
+    Array { array: Vec<RollupPropertyValue> },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -290,9 +287,10 @@ pub enum PropertyValue {
         id: PropertyId,
         relation: Option<Vec<RelationValue>>,
     },
+    /// <https://developers.notion.com/reference/page#rollup-property-values>
     Rollup {
         id: PropertyId,
-        relation: Option<Rollup>,
+        rollup: Option<RollupValue>,
     },
     People {
         id: PropertyId,
@@ -332,6 +330,75 @@ pub enum PropertyValue {
     },
     LastEditedBy {
         id: PropertyId,
+        last_edited_by: User,
+    },
+}
+
+/// <https://developers.notion.com/reference/page#rollup-property-value-element>
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum RollupPropertyValue {
+    /// <https://developers.notion.com/reference/page#rich-text-property-values>
+    #[serde(rename = "rich_text")]
+    Text {
+        rich_text: Vec<RichText>,
+    },
+    /// <https://developers.notion.com/reference/page#number-property-values>
+    Number {
+        number: Option<Number>,
+    },
+    /// <https://developers.notion.com/reference/page#select-property-values>
+    Select {
+        select: Option<SelectedValue>,
+    },
+    MultiSelect {
+        multi_select: Option<Vec<SelectedValue>>,
+    },
+    Date {
+        date: Option<DateValue>,
+    },
+    /// <https://developers.notion.com/reference/page#formula-property-values>
+    Formula {
+        formula: FormulaResultValue,
+    },
+    /// <https://developers.notion.com/reference/page#relation-property-values>
+    /// It is actually an array of relations
+    Relation {
+        relation: Option<Vec<RelationValue>>,
+    },
+    /// <https://developers.notion.com/reference/page#rollup-property-values>
+    Rollup {
+        rollup: Option<RollupValue>,
+    },
+    People {
+        people: Vec<User>,
+    },
+    Files {
+        files: Option<Vec<FileReference>>,
+    },
+    Checkbox {
+        checkbox: bool,
+    },
+    Url {
+        url: Option<String>,
+    },
+    Email {
+        email: Option<String>,
+    },
+    PhoneNumber {
+        phone_number: String,
+    },
+    CreatedTime {
+        created_time: DateTime<Utc>,
+    },
+    CreatedBy {
+        created_by: User,
+    },
+    LastEditedTime {
+        last_edited_time: DateTime<Utc>,
+    },
+    LastEditedBy {
         last_edited_by: User,
     },
 }
