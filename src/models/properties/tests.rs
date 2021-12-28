@@ -1,4 +1,4 @@
-use super::{DateOrDateTime, PropertyValue};
+use super::{DateOrDateTime, PropertyValue, RollupPropertyValue, RollupValue};
 use chrono::NaiveDate;
 
 #[test]
@@ -31,4 +31,26 @@ fn parse_select_property() {
 fn parse_text_property_with_link() {
     let _property: PropertyValue =
         serde_json::from_str(include_str!("tests/text_with_link.json")).unwrap();
+}
+
+#[test]
+fn parse_rollup_property() {
+    let property: PropertyValue =
+        serde_json::from_str(include_str!("tests/rollup_property.json")).unwrap();
+
+    assert!(matches!(
+        property,
+        PropertyValue::Rollup {
+            rollup: Some(RollupValue::Array { .. }),
+            ..
+        }
+    ));
+
+    if let PropertyValue::Rollup {
+        rollup: Some(RollupValue::Array { array }),
+        ..
+    } = property
+    {
+        assert!(matches!(array[0], RollupPropertyValue::Text { .. }))
+    }
 }
