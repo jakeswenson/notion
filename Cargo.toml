@@ -1,6 +1,6 @@
 [package]
 name = "notion"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Jake Swenson <jake@jakeswenson.com>"]
 edition = "2018"
 repository = "https://github.com/jakeswenson/notion"
