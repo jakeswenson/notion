@@ -307,7 +307,7 @@ impl AsIdentifier<BlockId> for Block {
             | NumberedListItem { common, .. }
             | ToDo { common, .. }
             | Toggle { common, .. }
-            | ChildPage { common, .. } => &common.id,
+            | ChildPage { common, .. }
             | Code { common, .. } => &common.id,
             Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
