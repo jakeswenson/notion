@@ -2,7 +2,7 @@ use crate::models::text::RichText;
 use crate::models::users::User;
 
 use super::{DateTime, Number, Utc};
-use crate::ids::{DatabaseId, PageId, PropertyId};
+use crate::ids::{AsIdentifier, DatabaseId, PageId, PropertyId};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
@@ -195,6 +195,32 @@ pub struct SelectedValue {
     pub color: Color,
 }
 
+impl AsIdentifier<PropertyId> for PropertyConfiguration {
+    fn as_id(&self) -> &PropertyId {
+        match self {
+            PropertyConfiguration::Title { id, .. } => id,
+            PropertyConfiguration::Text { id, .. } => id,
+            PropertyConfiguration::Number { id, .. } => id,
+            PropertyConfiguration::Select { id, .. } => id,
+            PropertyConfiguration::MultiSelect { id, .. } => id,
+            PropertyConfiguration::Date { id, .. } => id,
+            PropertyConfiguration::Formula { id, .. } => id,
+            PropertyConfiguration::Relation { id, .. } => id,
+            PropertyConfiguration::Rollup { id, .. } => id,
+            PropertyConfiguration::People { id, .. } => id,
+            PropertyConfiguration::Files { id, .. } => id,
+            PropertyConfiguration::Checkbox { id, .. } => id,
+            PropertyConfiguration::Url { id, .. } => id,
+            PropertyConfiguration::Email { id, .. } => id,
+            PropertyConfiguration::PhoneNumber { id, .. } => id,
+            PropertyConfiguration::CreatedTime { id, .. } => id,
+            PropertyConfiguration::CreatedBy { id, .. } => id,
+            PropertyConfiguration::LastEditedTime { id, .. } => id,
+            PropertyConfiguration::LastEditedBy { id, .. } => id,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum DateOrDateTime {
@@ -332,6 +358,32 @@ pub enum PropertyValue {
         id: PropertyId,
         last_edited_by: User,
     },
+}
+
+impl AsIdentifier<PropertyId> for PropertyValue {
+    fn as_id(&self) -> &PropertyId {
+        match self {
+            PropertyValue::Title { id, .. } => id,
+            PropertyValue::Text { id, .. } => id,
+            PropertyValue::Number { id, .. } => id,
+            PropertyValue::Select { id, .. } => id,
+            PropertyValue::MultiSelect { id, .. } => id,
+            PropertyValue::Date { id, .. } => id,
+            PropertyValue::Formula { id, .. } => id,
+            PropertyValue::Relation { id, .. } => id,
+            PropertyValue::Rollup { id, .. } => id,
+            PropertyValue::People { id, .. } => id,
+            PropertyValue::Files { id, .. } => id,
+            PropertyValue::Checkbox { id, .. } => id,
+            PropertyValue::Url { id, .. } => id,
+            PropertyValue::Email { id, .. } => id,
+            PropertyValue::PhoneNumber { id, .. } => id,
+            PropertyValue::CreatedTime { id, .. } => id,
+            PropertyValue::CreatedBy { id, .. } => id,
+            PropertyValue::LastEditedTime { id, .. } => id,
+            PropertyValue::LastEditedBy { id, .. } => id,
+        }
+    }
 }
 
 /// <https://developers.notion.com/reference/page#rollup-property-value-element>
