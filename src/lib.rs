@@ -3,6 +3,8 @@ use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Block, Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
+use models::properties::PropertyValue;
+use models::{PageCreate, Parent, Properties};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use tracing::Instrument;
@@ -171,6 +173,37 @@ impl NotionApi {
                 "https://api.notion.com/v1/pages/{}",
                 page_id.as_id()
             )))
+            .await?;
+
+        match result {
+            Object::Page { page } => Ok(page),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    pub async fn create_page(
+        &self,
+        parent: &Parent,
+        properties: &[PropertyValue],
+        children: &[Block],
+    ) -> Result<Page, Error> {
+        let new_page = PageCreate {
+            parent: parent.to_owned(),
+            properties: Properties {
+                properties: properties
+                    .iter()
+                    .map(|prop| (prop.as_id().to_string(), prop.to_owned()))
+                    .collect(),
+            },
+            children: children.to_owned(),
+        };
+
+        let result = self
+            .make_json_request(
+                self.client
+                    .post("https://api.notion.com/v1/pages")
+                    .json(&new_page),
+            )
             .await?;
 
         match result {

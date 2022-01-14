@@ -179,6 +179,13 @@ impl Properties {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct PageCreate {
+    pub parent: Parent,
+    pub properties: Properties,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Page {
     pub id: PageId,
     /// Date and time when this page was created.

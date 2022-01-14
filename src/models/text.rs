@@ -41,7 +41,9 @@ pub struct Annotations {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RichTextCommon {
     pub plain_text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub href: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub annotations: Option<Annotations>,
 }
 
@@ -89,6 +91,20 @@ impl RichText {
             Text { rich_text, .. } | Mention { rich_text, .. } | Equation { rich_text, .. } => {
                 &rich_text.plain_text
             }
+        }
+    }
+
+    pub fn from_plain_text(s: &str) -> RichText {
+        RichText::Text {
+            rich_text: RichTextCommon {
+                plain_text: s.to_string(),
+                href: None,
+                annotations: None,
+            },
+            text: Text {
+                content: s.to_string(),
+                link: None,
+            },
         }
     }
 }
