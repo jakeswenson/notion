@@ -188,13 +188,6 @@ pub enum PropertyConfiguration {
     LastEditedBy { id: PropertyId },
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct SelectedValue {
-    pub id: SelectOptionId,
-    pub name: String,
-    pub color: Color,
-}
-
 impl AsIdentifier<PropertyId> for PropertyConfiguration {
     fn as_id(&self) -> &PropertyId {
         match self {
@@ -292,11 +285,11 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/page#select-property-values>
     Select {
         id: PropertyId,
-        select: Option<SelectedValue>,
+        select: Option<SelectOption>,
     },
     MultiSelect {
         id: PropertyId,
-        multi_select: Option<Vec<SelectedValue>>,
+        multi_select: Option<Vec<SelectOption>>,
     },
     Date {
         id: PropertyId,
@@ -402,10 +395,10 @@ pub enum RollupPropertyValue {
     },
     /// <https://developers.notion.com/reference/page#select-property-values>
     Select {
-        select: Option<SelectedValue>,
+        select: Option<SelectOption>,
     },
     MultiSelect {
-        multi_select: Option<Vec<SelectedValue>>,
+        multi_select: Option<Vec<SelectOption>>,
     },
     Date {
         date: Option<DateValue>,
