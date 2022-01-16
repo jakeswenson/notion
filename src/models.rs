@@ -196,6 +196,7 @@ pub struct Page {
     pub archived: bool,
     pub properties: Properties,
     pub parent: Parent,
+    pub url: String,
 }
 
 impl Page {
