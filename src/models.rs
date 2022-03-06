@@ -235,6 +235,11 @@ pub struct CodeFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Equation {
+    pub expression: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -291,6 +296,16 @@ pub enum Block {
         common: BlockCommon,
         code: CodeFields,
     },
+    Quote {
+        #[serde(flatten)]
+        common: BlockCommon,
+        quote: TextAndChildren,
+    },
+    Equation {
+        #[serde(flatten)]
+        common: BlockCommon,
+        equation: Equation,
+    },
     #[serde(other)]
     Unsupported,
 }
@@ -308,7 +323,9 @@ impl AsIdentifier<BlockId> for Block {
             | ToDo { common, .. }
             | Toggle { common, .. }
             | ChildPage { common, .. }
-            | Code { common, .. } => &common.id,
+            | Code { common, .. }
+            | Quote { common, .. }
+            | Equation { common, .. } => &common.id,
             Unsupported {} => {
                 panic!("Trying to reference identifier for unsupported block!")
             }
