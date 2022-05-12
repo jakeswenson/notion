@@ -9,10 +9,8 @@ use tracing::Instrument;
 
 pub mod ids;
 pub mod models;
-pub use chrono;
 
-#[cfg(test)]
-mod tests;
+pub use chrono;
 
 const NOTION_API_VERSION: &str = "2022-02-22";
 

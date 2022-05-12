@@ -4,6 +4,8 @@ pub mod properties;
 pub mod search;
 pub mod text;
 pub mod users;
+#[cfg(test)]
+mod tests;
 
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
 use crate::models::text::RichText;
@@ -372,27 +374,5 @@ pub enum Object {
 impl Object {
     pub fn is_database(&self) -> bool {
         matches!(self, Object::Database { .. })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::models::{ListResponse, Object, Page};
-
-    #[test]
-    fn deserialize_page() {
-        let _page: Page = serde_json::from_str(include_str!("models/tests/page.json")).unwrap();
-    }
-
-    #[test]
-    fn deserialize_query_result() {
-        let _page: ListResponse<Page> =
-            serde_json::from_str(include_str!("models/tests/query_result.json")).unwrap();
-    }
-
-    #[test]
-    fn deserialize_number_format() {
-        let _search_results: ListResponse<Object> =
-            serde_json::from_str(include_str!("models/tests/issue_15.json")).unwrap();
     }
 }
