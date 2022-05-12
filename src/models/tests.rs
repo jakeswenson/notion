@@ -1,5 +1,10 @@
-use crate::models::text::{Annotations, Link, RichText, RichTextCommon, Text, TextColor};
+use std::str::FromStr;
+use chrono::{DateTime, NaiveDate};
+use crate::ids::UserId;
+use crate::models::text::{Annotations, Link, MentionObject, RichText, RichTextCommon, Text, TextColor};
 use crate::models::{ListResponse, Object, Page};
+use crate::models::properties::{DateOrDateTime, DateValue};
+use crate::models::users::{Person, User, UserCommon};
 
 #[test]
 fn deserialize_page() {
@@ -39,6 +44,139 @@ fn rich_text() {
             link: Some(Link {
                 url: "https://github.com/jakeswenson/notion".to_string()
             }),
+        },
+    })
+}
+
+#[test]
+fn rich_text_mention_user_person() {
+    let rich_text_mention_user_person: RichText = serde_json::from_str(include_str!("tests/rich_text_mention_user_person.json")).unwrap();
+    assert_eq!(rich_text_mention_user_person, RichText::Mention {
+        rich_text: RichTextCommon {
+            plain_text: "@John Doe".to_string(),
+            href: None,
+            annotations: Some(Annotations {
+                bold: Some(false),
+                code: Some(false),
+                color: Some(TextColor::Default),
+                italic: Some(false),
+                strikethrough: Some(false),
+                underline: Some(false),
+            }),
+        },
+        mention: MentionObject::User {
+            user: User::Person {
+                common: UserCommon {
+                    id: UserId::from_str("1118608e-35e8-4fa3-aef7-a4ced85ce8e0").unwrap(),
+                    name: Some("John Doe".to_string()),
+                    avatar_url: Some("https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg".to_string()),
+                },
+                person: Person { email: "john.doe@gmail.com".to_string() },
+            }
+        },
+    })
+}
+
+#[test]
+fn rich_text_mention_date() {
+    let rich_text_mention_date: RichText = serde_json::from_str(include_str!("tests/rich_text_mention_date.json")).unwrap();
+    assert_eq!(rich_text_mention_date, RichText::Mention {
+        rich_text: RichTextCommon {
+            plain_text: "2022-04-16 → ".to_string(),
+            href: None,
+            annotations: Some(Annotations {
+                bold: Some(false),
+                code: Some(false),
+                color: Some(TextColor::Default),
+                italic: Some(false),
+                strikethrough: Some(false),
+                underline: Some(false),
+            }),
+        },
+        mention: MentionObject::Date {
+            date: DateValue {
+                start: DateOrDateTime::Date(NaiveDate::from_str("2022-04-16").unwrap()),
+                end: None,
+                time_zone: None,
+            }
+        },
+    })
+}
+
+#[test]
+fn rich_text_mention_date_with_time() {
+    let rich_text_mention_date_with_time: RichText = serde_json::from_str(include_str!("tests/rich_text_mention_date_with_time.json")).unwrap();
+    assert_eq!(rich_text_mention_date_with_time, RichText::Mention {
+        rich_text: RichTextCommon {
+            plain_text: "2022-05-14T09:00:00.000-04:00 → ".to_string(),
+            href: None,
+            annotations: Some(Annotations {
+                bold: Some(false),
+                code: Some(false),
+                color: Some(TextColor::Default),
+                italic: Some(false),
+                strikethrough: Some(false),
+                underline: Some(false),
+            }),
+        },
+        mention: MentionObject::Date {
+            date: DateValue {
+                start: DateOrDateTime::DateTime(DateTime::from_str("2022-05-14T09:00:00.000-04:00").unwrap()),
+                end: None,
+                time_zone: None,
+            }
+        },
+    })
+}
+
+#[test]
+fn rich_text_mention_date_with_end() {
+    let rich_text_mention_date_with_end: RichText = serde_json::from_str(include_str!("tests/rich_text_mention_date_with_end.json")).unwrap();
+    assert_eq!(rich_text_mention_date_with_end, RichText::Mention {
+        rich_text: RichTextCommon {
+            plain_text: "2022-05-12 → 2022-05-13".to_string(),
+            href: None,
+            annotations: Some(Annotations {
+                bold: Some(false),
+                code: Some(false),
+                color: Some(TextColor::Default),
+                italic: Some(false),
+                strikethrough: Some(false),
+                underline: Some(false),
+            }),
+        },
+        mention: MentionObject::Date {
+            date: DateValue {
+                start: DateOrDateTime::Date(NaiveDate::from_str("2022-05-12").unwrap()),
+                end: Some(DateOrDateTime::Date(NaiveDate::from_str("2022-05-13").unwrap())),
+                time_zone: None,
+            }
+        },
+    })
+}
+
+#[test]
+fn rich_text_mention_date_with_end_and_time() {
+    let rich_text_mention_date_with_end_and_time: RichText = serde_json::from_str(include_str!("tests/rich_text_mention_date_with_end_and_time.json")).unwrap();
+    assert_eq!(rich_text_mention_date_with_end_and_time, RichText::Mention {
+        rich_text: RichTextCommon {
+            plain_text: "2022-04-16T12:00:00.000-04:00 → 2022-04-16T12:00:00.000-04:00".to_string(),
+            href: None,
+            annotations: Some(Annotations {
+                bold: Some(false),
+                code: Some(false),
+                color: Some(TextColor::Default),
+                italic: Some(false),
+                strikethrough: Some(false),
+                underline: Some(false),
+            }),
+        },
+        mention: MentionObject::Date {
+            date: DateValue {
+                start: DateOrDateTime::DateTime(DateTime::from_str("2022-04-16T12:00:00.000-04:00").unwrap()),
+                end: Some(DateOrDateTime::DateTime(DateTime::from_str("2022-04-16T12:00:00.000-04:00").unwrap())),
+                time_zone: None,
+            }
         },
     })
 }
