@@ -21,7 +21,7 @@ const NOTION_API_VERSION: &str = "2022-02-22";
 pub enum Error {
     #[error("Invalid Notion API Token: {}", source)]
     InvalidApiToken {
-        source: reqwest::header::InvalidHeaderValue,
+        source: header::InvalidHeaderValue,
     },
 
     #[error("Unable to build reqwest HTTP client: {}", source)]
