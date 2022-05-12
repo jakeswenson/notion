@@ -20,8 +20,8 @@ fn deserialize_number_format() {
 
 #[test]
 fn rich_text() {
-    let rich_text: RichText = serde_json::from_str(include_str!("tests/rich_text_text.json")).unwrap();
-    assert_eq!(rich_text, RichText::Text {
+    let rich_text_text: RichText = serde_json::from_str(include_str!("tests/rich_text_text.json")).unwrap();
+    assert_eq!(rich_text_text, RichText::Text {
         rich_text: RichTextCommon {
             plain_text: "Rich".to_string(),
             href: Some("https://github.com/jakeswenson/notion".to_string()),
