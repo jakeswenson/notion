@@ -372,9 +372,10 @@ impl AsIdentifier<BlockId> for Block {
             | ChildPage { common, .. }
             | Code { common, .. }
             | Quote { common, .. }
-            | Equation { common, .. } => &common.id,
-            Unsupported {} => {
-                panic!("Trying to reference identifier for unsupported block!")
+            | Equation { common, .. }
+            | Unsupported { common, .. } => &common.id,
+            Unknown {} => {
+                panic!("Trying to reference identifier for unknown block!")
             }
         }
     }
