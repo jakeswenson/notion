@@ -211,7 +211,7 @@ pub struct BlockCommon {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct TextAndChildren {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
     pub children: Option<Vec<Block>>,
 }
 
