@@ -310,8 +310,12 @@ pub enum Block {
         common: BlockCommon,
         equation: Equation,
     },
+    Unsupported {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
     #[serde(other)]
-    Unsupported,
+    Unknown
 }
 
 impl AsIdentifier<BlockId> for Block {
