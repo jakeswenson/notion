@@ -194,13 +194,13 @@ fn heading_1() {
             created_by: UserCommon {
                 id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
                 name: None,
-                avatar_url: None
+                avatar_url: None,
             },
             last_edited_by: UserCommon {
                 id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
                 name: None,
-                avatar_url: None
-            }
+                avatar_url: None,
+            },
         },
         heading_1: models::Text {
             rich_text: vec![
@@ -219,8 +219,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: "This".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -237,8 +237,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: " ".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -255,8 +255,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: "is".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -273,8 +273,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: " ".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -291,8 +291,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: "a".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -309,8 +309,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: " ".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -327,8 +327,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: "Heading".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -345,8 +345,8 @@ fn heading_1() {
                     },
                     text: Text {
                         content: " ".to_string(),
-                        link: None
-                    }
+                        link: None,
+                    },
                 },
                 RichText::Text {
                     rich_text: RichTextCommon {
@@ -363,11 +363,11 @@ fn heading_1() {
                     },
                     text: Text {
                         content: "1".to_string(),
-                        link: None
-                    }
-                }
+                        link: None,
+                    },
+                },
             ]
-        }
+        },
     })
 }
 

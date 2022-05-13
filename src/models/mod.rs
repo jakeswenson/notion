@@ -353,7 +353,7 @@ pub enum Block {
         common: BlockCommon,
     },
     #[serde(other)]
-    Unknown
+    Unknown,
 }
 
 impl AsIdentifier<BlockId> for Block {

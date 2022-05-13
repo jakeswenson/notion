@@ -60,9 +60,9 @@ pub struct Text {
 }
 
 /// See https://developers.notion.com/reference/rich-text#mention-objects
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub enum MentionObject {
     User {
         user: User
