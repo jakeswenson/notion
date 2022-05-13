@@ -1,8 +1,9 @@
 use std::str::FromStr;
 use chrono::{DateTime, NaiveDate};
+use crate::{Block, BlockId, models};
 use crate::ids::UserId;
 use crate::models::text::{Annotations, Link, MentionObject, RichText, RichTextCommon, Text, TextColor};
-use crate::models::{ListResponse, Object, Page};
+use crate::models::{BlockCommon, ListResponse, Object, Page};
 use crate::models::properties::{DateOrDateTime, DateValue};
 use crate::models::users::{Person, User, UserCommon};
 
@@ -178,5 +179,194 @@ fn rich_text_mention_date_with_end_and_time() {
                 time_zone: None,
             }
         },
+    })
+}
+
+#[test]
+fn heading_1() {
+    let heading_1: Block = serde_json::from_str(include_str!("tests/heading_1.json")).unwrap();
+    assert_eq!(heading_1, Block::Heading1 {
+        common: BlockCommon {
+            id: BlockId::from_str("9e891834-6a03-475c-a2b8-421e17f0f3aa").unwrap(),
+            created_time: DateTime::from_str("2022-05-12T21:15:00.000Z").unwrap(),
+            last_edited_time: DateTime::from_str("2022-05-12T22:10:00.000Z").unwrap(),
+            has_children: false,
+            created_by: UserCommon {
+                id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
+                name: None,
+                avatar_url: None
+            },
+            last_edited_by: UserCommon {
+                id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
+                name: None,
+                avatar_url: None
+            }
+        },
+        heading_1: models::Text {
+            rich_text: vec![
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: "This".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(true),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: "This".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: " ".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: " ".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: "is".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(true),
+                        }),
+                    },
+                    text: Text {
+                        content: "is".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: " ".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: " ".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: "a".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(true),
+                            strikethrough: Some(false),
+                            underline: Some(true),
+                        }),
+                    },
+                    text: Text {
+                        content: "a".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: " ".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: " ".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: "Heading".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(true),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: "Heading".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: " ".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(false),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: " ".to_string(),
+                        link: None
+                    }
+                },
+                RichText::Text {
+                    rich_text: RichTextCommon {
+                        plain_text: "1".to_string(),
+                        href: None,
+                        annotations: Some(Annotations {
+                            bold: Some(false),
+                            code: Some(false),
+                            color: Some(TextColor::Default),
+                            italic: Some(false),
+                            strikethrough: Some(true),
+                            underline: Some(false),
+                        }),
+                    },
+                    text: Text {
+                        content: "1".to_string(),
+                        link: None
+                    }
+                }
+            ]
+        }
     })
 }

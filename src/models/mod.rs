@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
-use crate::models::users::User;
+use crate::models::users::{User, UserCommon};
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
 
@@ -205,6 +205,8 @@ pub struct BlockCommon {
     pub created_time: DateTime<Utc>,
     pub last_edited_time: DateTime<Utc>,
     pub has_children: bool,
+    pub created_by: UserCommon,
+    pub last_edited_by: UserCommon,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -215,7 +217,7 @@ pub struct TextAndChildren {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Text {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
