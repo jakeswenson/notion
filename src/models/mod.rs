@@ -8,7 +8,7 @@ pub mod users;
 mod tests;
 
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
-use crate::models::text::RichText;
+use crate::models::text::{RichText, TextColor};
 use crate::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -221,6 +221,39 @@ pub struct Text {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct FileObject{
+    url: String,
+    expiry_time: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ExternalFileObject{
+    url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum FileOrEmojiObject {
+    Emoji {
+        emoji: String
+    },
+    File {
+        file: FileObject
+    },
+    External {
+        external: ExternalFileObject
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Callout {
+    pub rich_text: Vec<RichText>,
+    pub icon: FileOrEmojiObject,
+    pub color: TextColor,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ToDoFields {
     pub text: Vec<RichText>,
     pub checked: bool,
@@ -269,6 +302,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         heading_3: Text,
+    },
+    Callout {
+        #[serde(flatten)]
+        common: BlockCommon,
+        callout: Callout,
     },
     BulletedListItem {
         #[serde(flatten)]
@@ -326,6 +364,7 @@ impl AsIdentifier<BlockId> for Block {
             | Heading1 { common, .. }
             | Heading2 { common, .. }
             | Heading3 { common, .. }
+            | Callout { common, .. }
             | BulletedListItem { common, .. }
             | NumberedListItem { common, .. }
             | ToDo { common, .. }

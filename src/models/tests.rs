@@ -3,7 +3,7 @@ use chrono::{DateTime, NaiveDate};
 use crate::{Block, BlockId, models};
 use crate::ids::UserId;
 use crate::models::text::{Annotations, Link, MentionObject, RichText, RichTextCommon, Text, TextColor};
-use crate::models::{BlockCommon, ListResponse, Object, Page};
+use crate::models::{BlockCommon, Callout, ExternalFileObject, FileObject, FileOrEmojiObject, ListResponse, Object, Page};
 use crate::models::properties::{DateOrDateTime, DateValue};
 use crate::models::users::{Person, User, UserCommon};
 
@@ -367,6 +367,83 @@ fn heading_1() {
                     }
                 }
             ]
+        }
+    })
+}
+
+#[test]
+fn emoji_object() {
+    let emoji_object: FileOrEmojiObject = serde_json::from_str(include_str!("tests/emoji_object.json")).unwrap();
+    assert_eq!(emoji_object, FileOrEmojiObject::Emoji {
+        emoji: "💡".to_string()
+    })
+}
+
+#[test]
+fn file_object() {
+    let file_object: FileOrEmojiObject = serde_json::from_str(include_str!("tests/file_object.json")).unwrap();
+    assert_eq!(file_object, FileOrEmojiObject::File {
+        file: FileObject {
+            url: "https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2703e742-ace5-428c-a74d-1c587ceddc32/DiRT_Rally.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220513%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220513T201035Z&X-Amz-Expires=3600&X-Amz-Signature=714b49bde0b499fb8f3aae1a88a8cbd374f2b09c1d128e91cac49e85ce0e00fb&X-Amz-SignedHeaders=host&x-id=GetObject".to_string(),
+            expiry_time: DateTime::from_str("2022-05-13T21:10:35.817Z").unwrap(),
+        }
+    })
+}
+
+#[test]
+fn external_file_object() {
+    let external_file_object: FileOrEmojiObject = serde_json::from_str(include_str!("tests/external_file_object.json")).unwrap();
+    assert_eq!(external_file_object, FileOrEmojiObject::External {
+        external: ExternalFileObject {
+            url: "https://nerdist.com/wp-content/uploads/2020/07/maxresdefault.jpg".to_string(),
+        }
+    })
+}
+
+#[test]
+fn callout() {
+    let callout: Object = serde_json::from_str(include_str!("tests/callout.json")).unwrap();
+    assert_eq!(callout, Object::Block {
+        block: Block::Callout {
+            common: BlockCommon {
+                id: BlockId::from_str("00e8829a-a7b8-4075-884a-8f53be145d2f").unwrap(),
+                created_time: DateTime::from_str("2022-05-13T20:08:00.000Z").unwrap(),
+                last_edited_time: DateTime::from_str("2022-05-13T20:08:00.000Z").unwrap(),
+                has_children: true,
+                created_by: UserCommon {
+                    id: UserId::from_str("e2507360-468c-4e0f-a928-7bbcbbb45353").unwrap(),
+                    name: None,
+                    avatar_url: None,
+                },
+                last_edited_by: UserCommon {
+                    id: UserId::from_str("e2507360-468c-4e0f-a928-7bbcbbb45353").unwrap(),
+                    name: None,
+                    avatar_url: None,
+                },
+            },
+            callout: Callout {
+                rich_text: vec![
+                    RichText::Text {
+                        rich_text: RichTextCommon {
+                            plain_text: "Test callout".to_string(),
+                            href: None,
+                            annotations: Some(Annotations {
+                                bold: Some(false),
+                                code: Some(false),
+                                color: Some(TextColor::Default),
+                                italic: Some(false),
+                                strikethrough: Some(false),
+                                underline: Some(false),
+                            }),
+                        },
+                        text: Text { content: "Test callout".to_string(), link: None },
+                    }
+                ],
+                icon: FileOrEmojiObject::Emoji {
+                    emoji: "💡".to_string()
+                },
+                color: TextColor::Green,
+            },
         }
     })
 }
