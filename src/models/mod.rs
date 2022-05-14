@@ -491,6 +491,10 @@ pub enum Block {
         common: BlockCommon,
         equation: Equation,
     },
+    Divider {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
     Unsupported {
         #[serde(flatten)]
         common: BlockCommon,
