@@ -422,6 +422,19 @@ pub enum LinkToPageFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableFields {
+    pub table_width: u64,
+    pub has_column_header: bool,
+    pub has_row_header: bool,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableRowFields {
+    pub cells: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -566,6 +579,16 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         link_to_page: LinkToPageFields,
+    },
+    Table {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table: TableFields,
+    },
+    TableRow {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table_row: TableRowFields,
     },
     Unsupported {
         #[serde(flatten)]
