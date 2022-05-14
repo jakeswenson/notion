@@ -607,16 +607,33 @@ impl AsIdentifier<BlockId> for Block {
             | Heading2 { common, .. }
             | Heading3 { common, .. }
             | Callout { common, .. }
+            | Quote { common, .. }
             | BulletedListItem { common, .. }
             | NumberedListItem { common, .. }
             | ToDo { common, .. }
             | Toggle { common, .. }
-            | ChildPage { common, .. }
             | Code { common, .. }
-            | Quote { common, .. }
+            | ChildPage { common, .. }
+            | ChildDatabase { common, .. }
+            | Embed { common, .. }
+            | Image { common, .. }
+            | Video { common, .. }
+            | File { common, .. }
+            | Pdf { common, .. }
+            | Bookmark { common, .. }
             | Equation { common, .. }
-            | Unsupported { common, .. } => &common.id,
-            Unknown {} => {
+            | Divider { common, .. }
+            | TableOfContents { common, .. }
+            | Breadcrumb { common, .. }
+            | ColumnList { common, .. }
+            | Column { common, .. }
+            | LinkPreview { common, .. }
+            | Template { common, .. }
+            | LinkToPage { common, .. }
+            | Table { common, .. }
+            | TableRow { common, .. }
+            | Unsupported { common, .. } => { &common.id }
+            Unknown => {
                 panic!("Trying to reference identifier for unknown block!")
             }
         }
