@@ -262,6 +262,11 @@ pub struct ChildPageFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ChildDatabaseFields {
+    pub title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum CodeLanguage {
     Abap,
@@ -424,6 +429,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         child_page: ChildPageFields,
+    },
+    ChildDatabase {
+        #[serde(flatten)]
+        common: BlockCommon,
+        child_page: ChildDatabaseFields,
     },
     Equation {
         #[serde(flatten)]
