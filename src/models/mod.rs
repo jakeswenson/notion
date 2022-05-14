@@ -281,6 +281,12 @@ pub struct EmbedFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct BookmarkFields {
+    pub url: String,
+    pub caption: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum CodeLanguage {
     Abap,
@@ -474,6 +480,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         pdf: FileObject,
+    },
+    Bookmark {
+        #[serde(flatten)]
+        common: BlockCommon,
+        bookmark: BookmarkFields,
     },
     Equation {
         #[serde(flatten)]
