@@ -384,6 +384,11 @@ pub struct Equation {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableOfContents {
+    pub color: TextColor,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -494,6 +499,11 @@ pub enum Block {
     Divider {
         #[serde(flatten)]
         common: BlockCommon,
+    },
+    TableOfContents {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table_of_contents: TableOfContents,
     },
     Unsupported {
         #[serde(flatten)]
