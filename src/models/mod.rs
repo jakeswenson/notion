@@ -462,7 +462,7 @@ pub enum Block {
     Video {
         #[serde(flatten)]
         common: BlockCommon,
-        image: FileObject,
+        video: FileObject,
     },
     File {
         #[serde(flatten)]
