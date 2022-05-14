@@ -533,17 +533,17 @@ pub enum Block {
     ColumnList {
         #[serde(flatten)]
         common: BlockCommon,
-        column_list: ColumnListFields
+        column_list: ColumnListFields,
     },
     Column {
         #[serde(flatten)]
         common: BlockCommon,
-        column: ColumnFields
+        column: ColumnFields,
     },
     LinkPreview {
         #[serde(flatten)]
         common: BlockCommon,
-        link_preview: LinkPreviewFields
+        link_preview: LinkPreviewFields,
     },
     Template {
         #[serde(flatten)]
