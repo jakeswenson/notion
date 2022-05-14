@@ -213,6 +213,7 @@ pub struct BlockCommon {
 pub struct TextAndChildren {
     pub rich_text: Vec<RichText>,
     pub children: Option<Vec<Block>>,
+    pub color: TextColor
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -308,6 +309,11 @@ pub enum Block {
         common: BlockCommon,
         callout: Callout,
     },
+    Quote {
+        #[serde(flatten)]
+        common: BlockCommon,
+        quote: TextAndChildren,
+    },
     BulletedListItem {
         #[serde(flatten)]
         common: BlockCommon,
@@ -337,11 +343,6 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         code: CodeFields,
-    },
-    Quote {
-        #[serde(flatten)]
-        common: BlockCommon,
-        quote: TextAndChildren,
     },
     Equation {
         #[serde(flatten)]
