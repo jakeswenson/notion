@@ -412,6 +412,18 @@ pub struct TemplateFields {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
+pub enum LinkToPageFields {
+    PageId {
+        page_id: PageId
+    },
+    DatabaseId {
+        database_id: DatabaseId
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
 pub enum Block {
     Paragraph {
         #[serde(flatten)]
@@ -549,6 +561,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         template: TemplateFields,
+    },
+    LinkToPage {
+        #[serde(flatten)]
+        common: BlockCommon,
+        link_to_page: LinkToPageFields,
     },
     Unsupported {
         #[serde(flatten)]
