@@ -389,6 +389,16 @@ pub struct TableOfContents {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ColumnListFields {
+    pub children: ColumnFields,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ColumnFields {
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -508,6 +518,16 @@ pub enum Block {
     Breadcrumb {
         #[serde(flatten)]
         common: BlockCommon,
+    },
+    ColumnList {
+        #[serde(flatten)]
+        common: BlockCommon,
+        column_list: ColumnListFields
+    },
+    Column {
+        #[serde(flatten)]
+        common: BlockCommon,
+        column: ColumnFields
     },
     Unsupported {
         #[serde(flatten)]
