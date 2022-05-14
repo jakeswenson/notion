@@ -222,7 +222,7 @@ pub struct Text {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct FileObject {
+pub struct InternalFileObject {
     url: String,
     expiry_time: DateTime<Utc>,
 }
@@ -237,7 +237,7 @@ pub struct ExternalFileObject {
 #[serde(rename_all = "snake_case")]
 pub enum FileOrEmojiObject {
     Emoji { emoji: String },
-    File { file: FileObject },
+    File { file: InternalFileObject },
     External { external: ExternalFileObject },
 }
 
