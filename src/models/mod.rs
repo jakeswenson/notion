@@ -505,6 +505,10 @@ pub enum Block {
         common: BlockCommon,
         table_of_contents: TableOfContents,
     },
+    Breadcrumb {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
     Unsupported {
         #[serde(flatten)]
         common: BlockCommon,
