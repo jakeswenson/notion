@@ -242,6 +242,15 @@ pub enum FileOrEmojiObject {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum FileObject {
+    File { file: InternalFileObject },
+    External { external: ExternalFileObject },
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Callout {
     pub rich_text: Vec<RichText>,
     pub icon: FileOrEmojiObject,
@@ -444,6 +453,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         embed: EmbedFields,
+    },
+    Image {
+        #[serde(flatten)]
+        common: BlockCommon,
+        image: FileObject,
     },
     Equation {
         #[serde(flatten)]
