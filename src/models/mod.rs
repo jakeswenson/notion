@@ -422,6 +422,17 @@ pub enum LinkToPageFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct SyncedFromObject {
+    pub block_id: BlockId,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct SyncedBlockFields {
+    pub synced_from: Option<SyncedFromObject>,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct TableFields {
     pub table_width: u64,
     pub has_column_header: bool,
@@ -585,6 +596,11 @@ pub enum Block {
         common: BlockCommon,
         table: TableFields,
     },
+    SyncedBlock {
+        #[serde(flatten)]
+        common: BlockCommon,
+        synced_block: SyncedBlockFields,
+    },
     TableRow {
         #[serde(flatten)]
         common: BlockCommon,
@@ -630,6 +646,7 @@ impl AsIdentifier<BlockId> for Block {
             | LinkPreview { common, .. }
             | Template { common, .. }
             | LinkToPage { common, .. }
+            | SyncedBlock { common, .. }
             | Table { common, .. }
             | TableRow { common, .. }
             | Unsupported { common, .. } => { &common.id }
