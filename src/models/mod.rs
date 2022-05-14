@@ -2,10 +2,10 @@ pub mod error;
 pub mod paging;
 pub mod properties;
 pub mod search;
-pub mod text;
-pub mod users;
 #[cfg(test)]
 mod tests;
+pub mod text;
+pub mod users;
 
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
 use crate::models::text::{RichText, TextColor};
@@ -213,7 +213,7 @@ pub struct BlockCommon {
 pub struct TextAndChildren {
     pub rich_text: Vec<RichText>,
     pub children: Option<Vec<Block>>,
-    pub color: TextColor
+    pub color: TextColor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -222,13 +222,13 @@ pub struct Text {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct FileObject{
+pub struct FileObject {
     url: String,
     expiry_time: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
-pub struct ExternalFileObject{
+pub struct ExternalFileObject {
     url: String,
 }
 
@@ -236,15 +236,9 @@ pub struct ExternalFileObject{
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum FileOrEmojiObject {
-    Emoji {
-        emoji: String
-    },
-    File {
-        file: FileObject
-    },
-    External {
-        external: ExternalFileObject
-    },
+    Emoji { emoji: String },
+    File { file: FileObject },
+    External { external: ExternalFileObject },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
