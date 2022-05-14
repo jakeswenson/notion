@@ -470,6 +470,11 @@ pub enum Block {
         file: FileObject,
         caption: Text,
     },
+    Pdf {
+        #[serde(flatten)]
+        common: BlockCommon,
+        pdf: FileObject,
+    },
     Equation {
         #[serde(flatten)]
         common: BlockCommon,
