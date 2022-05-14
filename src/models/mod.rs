@@ -399,6 +399,11 @@ pub struct ColumnFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct LinkPreviewFields {
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -528,6 +533,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         column: ColumnFields
+    },
+    LinkPreview {
+        #[serde(flatten)]
+        common: BlockCommon,
+        link_preview: LinkPreviewFields
     },
     Unsupported {
         #[serde(flatten)]
