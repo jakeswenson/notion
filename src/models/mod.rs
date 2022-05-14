@@ -404,6 +404,12 @@ pub struct LinkPreviewFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TemplateFields {
+    pub rich_text: Vec<RichText>,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum Block {
@@ -538,6 +544,11 @@ pub enum Block {
         #[serde(flatten)]
         common: BlockCommon,
         link_preview: LinkPreviewFields
+    },
+    Template {
+        #[serde(flatten)]
+        common: BlockCommon,
+        template: TemplateFields,
     },
     Unsupported {
         #[serde(flatten)]
