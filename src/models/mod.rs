@@ -259,6 +259,7 @@ pub struct ToDoFields {
     pub text: Vec<RichText>,
     pub checked: bool,
     pub children: Option<Vec<Block>>,
+    pub color: TextColor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
