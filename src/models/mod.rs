@@ -259,7 +259,7 @@ pub struct Callout {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ToDoFields {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
     pub checked: bool,
     pub children: Option<Vec<Block>>,
     pub color: TextColor,
