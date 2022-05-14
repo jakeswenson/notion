@@ -459,6 +459,11 @@ pub enum Block {
         common: BlockCommon,
         image: FileObject,
     },
+    Video {
+        #[serde(flatten)]
+        common: BlockCommon,
+        image: FileObject,
+    },
     Equation {
         #[serde(flatten)]
         common: BlockCommon,
