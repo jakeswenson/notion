@@ -206,7 +206,7 @@ pub enum DateOrDateTime {
 pub struct DateValue {
     pub start: DateOrDateTime,
     pub end: Option<DateOrDateTime>,
-    pub time_zone: Option<String>
+    pub time_zone: Option<String>,
 }
 
 /// Formula property value objects represent the result of evaluating a formula

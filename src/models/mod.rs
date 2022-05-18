@@ -249,7 +249,6 @@ pub enum FileObject {
     External { external: ExternalFileObject },
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Callout {
     pub rich_text: Vec<RichText>,
@@ -413,12 +412,8 @@ pub struct TemplateFields {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum LinkToPageFields {
-    PageId {
-        page_id: PageId
-    },
-    DatabaseId {
-        database_id: DatabaseId
-    },
+    PageId { page_id: PageId },
+    DatabaseId { database_id: DatabaseId },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -649,7 +644,7 @@ impl AsIdentifier<BlockId> for Block {
             | SyncedBlock { common, .. }
             | Table { common, .. }
             | TableRow { common, .. }
-            | Unsupported { common, .. } => { &common.id }
+            | Unsupported { common, .. } => &common.id,
             Unknown => {
                 panic!("Trying to reference identifier for unknown block!")
             }
