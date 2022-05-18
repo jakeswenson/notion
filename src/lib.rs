@@ -9,19 +9,17 @@ use tracing::Instrument;
 
 pub mod ids;
 pub mod models;
+
 pub use chrono;
 
-#[cfg(test)]
-mod tests;
-
-const NOTION_API_VERSION: &str = "2021-08-16";
+const NOTION_API_VERSION: &str = "2022-02-22";
 
 /// An wrapper Error type for all errors produced by the [`NotionApi`](NotionApi) client.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Invalid Notion API Token: {}", source)]
     InvalidApiToken {
-        source: reqwest::header::InvalidHeaderValue,
+        source: header::InvalidHeaderValue,
     },
 
     #[error("Unable to build reqwest HTTP client: {}", source)]

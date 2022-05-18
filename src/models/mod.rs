@@ -2,11 +2,13 @@ pub mod error;
 pub mod paging;
 pub mod properties;
 pub mod search;
+#[cfg(test)]
+mod tests;
 pub mod text;
 pub mod users;
 
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
-use crate::models::text::RichText;
+use crate::models::text::{RichText, TextColor};
 use crate::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -14,7 +16,7 @@ use std::collections::HashMap;
 use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
-use crate::models::users::User;
+use crate::models::users::{User, UserCommon};
 pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
 
@@ -203,24 +205,64 @@ pub struct BlockCommon {
     pub created_time: DateTime<Utc>,
     pub last_edited_time: DateTime<Utc>,
     pub has_children: bool,
+    pub created_by: UserCommon,
+    pub last_edited_by: UserCommon,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct TextAndChildren {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
     pub children: Option<Vec<Block>>,
+    pub color: TextColor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Text {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct InternalFileObject {
+    url: String,
+    expiry_time: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ExternalFileObject {
+    url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum FileOrEmojiObject {
+    Emoji { emoji: String },
+    File { file: InternalFileObject },
+    External { external: ExternalFileObject },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum FileObject {
+    File { file: InternalFileObject },
+    External { external: ExternalFileObject },
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Callout {
+    pub rich_text: Vec<RichText>,
+    pub icon: FileOrEmojiObject,
+    pub color: TextColor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct ToDoFields {
-    pub text: Vec<RichText>,
+    pub rich_text: Vec<RichText>,
     pub checked: bool,
     pub children: Option<Vec<Block>>,
+    pub color: TextColor,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -229,14 +271,178 @@ pub struct ChildPageFields {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ChildDatabaseFields {
+    pub title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct EmbedFields {
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct BookmarkFields {
+    pub url: String,
+    pub caption: Vec<RichText>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum CodeLanguage {
+    Abap,
+    Arduino,
+    Bash,
+    Basic,
+    C,
+    Clojure,
+    Coffeescript,
+    #[serde(rename = "c++")]
+    CPlusPlus,
+    #[serde(rename = "c#")]
+    CSharp,
+    Css,
+    Dart,
+    Diff,
+    Docker,
+    Elixir,
+    Elm,
+    Erlang,
+    Flow,
+    Fortran,
+    #[serde(rename = "f#")]
+    FSharp,
+    Gherkin,
+    Glsl,
+    Go,
+    Graphql,
+    Groovy,
+    Haskell,
+    Html,
+    Java,
+    Javascript,
+    Json,
+    Julia,
+    Kotlin,
+    Latex,
+    Less,
+    Lisp,
+    Livescript,
+    Lua,
+    Makefile,
+    Markdown,
+    Markup,
+    Matlab,
+    Mermaid,
+    Nix,
+    #[serde(rename = "objective-c")]
+    ObjectiveC,
+    Ocaml,
+    Pascal,
+    Perl,
+    Php,
+    #[serde(rename = "plain text")]
+    PlainText,
+    Powershell,
+    Prolog,
+    Protobuf,
+    Python,
+    R,
+    Reason,
+    Ruby,
+    Rust,
+    Sass,
+    Scala,
+    Scheme,
+    Scss,
+    Shell,
+    Sql,
+    Swift,
+    Typescript,
+    #[serde(rename = "vb.net")]
+    VbNet,
+    Verilog,
+    Vhdl,
+    #[serde(rename = "visual basic")]
+    VisualBasic,
+    Webassembly,
+    Xml,
+    Yaml,
+    #[serde(rename = "java/c/c++/c#")]
+    JavaCAndCPlusPlusAndCSharp,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct CodeFields {
-    pub text: Vec<RichText>,
-    pub language: String,
+    pub rich_text: Vec<RichText>,
+    pub caption: Vec<RichText>,
+    pub language: CodeLanguage,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Equation {
     pub expression: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableOfContents {
+    pub color: TextColor,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ColumnListFields {
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct ColumnFields {
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct LinkPreviewFields {
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TemplateFields {
+    pub rich_text: Vec<RichText>,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum LinkToPageFields {
+    PageId {
+        page_id: PageId
+    },
+    DatabaseId {
+        database_id: DatabaseId
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct SyncedFromObject {
+    pub block_id: BlockId,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct SyncedBlockFields {
+    pub synced_from: Option<SyncedFromObject>,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableFields {
+    pub table_width: u64,
+    pub has_column_header: bool,
+    pub has_row_header: bool,
+    pub children: Vec<Block>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct TableRowFields {
+    pub cells: Vec<RichText>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -266,6 +472,16 @@ pub enum Block {
         common: BlockCommon,
         heading_3: Text,
     },
+    Callout {
+        #[serde(flatten)]
+        common: BlockCommon,
+        callout: Callout,
+    },
+    Quote {
+        #[serde(flatten)]
+        common: BlockCommon,
+        quote: TextAndChildren,
+    },
     BulletedListItem {
         #[serde(flatten)]
         common: BlockCommon,
@@ -286,28 +502,116 @@ pub enum Block {
         common: BlockCommon,
         toggle: TextAndChildren,
     },
-    ChildPage {
-        #[serde(flatten)]
-        common: BlockCommon,
-        child_page: ChildPageFields,
-    },
     Code {
         #[serde(flatten)]
         common: BlockCommon,
         code: CodeFields,
     },
-    Quote {
+    ChildPage {
         #[serde(flatten)]
         common: BlockCommon,
-        quote: TextAndChildren,
+        child_page: ChildPageFields,
+    },
+    ChildDatabase {
+        #[serde(flatten)]
+        common: BlockCommon,
+        child_page: ChildDatabaseFields,
+    },
+    Embed {
+        #[serde(flatten)]
+        common: BlockCommon,
+        embed: EmbedFields,
+    },
+    Image {
+        #[serde(flatten)]
+        common: BlockCommon,
+        image: FileObject,
+    },
+    Video {
+        #[serde(flatten)]
+        common: BlockCommon,
+        video: FileObject,
+    },
+    File {
+        #[serde(flatten)]
+        common: BlockCommon,
+        file: FileObject,
+        caption: Text,
+    },
+    Pdf {
+        #[serde(flatten)]
+        common: BlockCommon,
+        pdf: FileObject,
+    },
+    Bookmark {
+        #[serde(flatten)]
+        common: BlockCommon,
+        bookmark: BookmarkFields,
     },
     Equation {
         #[serde(flatten)]
         common: BlockCommon,
         equation: Equation,
     },
+    Divider {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
+    TableOfContents {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table_of_contents: TableOfContents,
+    },
+    Breadcrumb {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
+    ColumnList {
+        #[serde(flatten)]
+        common: BlockCommon,
+        column_list: ColumnListFields,
+    },
+    Column {
+        #[serde(flatten)]
+        common: BlockCommon,
+        column: ColumnFields,
+    },
+    LinkPreview {
+        #[serde(flatten)]
+        common: BlockCommon,
+        link_preview: LinkPreviewFields,
+    },
+    Template {
+        #[serde(flatten)]
+        common: BlockCommon,
+        template: TemplateFields,
+    },
+    LinkToPage {
+        #[serde(flatten)]
+        common: BlockCommon,
+        link_to_page: LinkToPageFields,
+    },
+    Table {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table: TableFields,
+    },
+    SyncedBlock {
+        #[serde(flatten)]
+        common: BlockCommon,
+        synced_block: SyncedBlockFields,
+    },
+    TableRow {
+        #[serde(flatten)]
+        common: BlockCommon,
+        table_row: TableRowFields,
+    },
+    Unsupported {
+        #[serde(flatten)]
+        common: BlockCommon,
+    },
     #[serde(other)]
-    Unsupported,
+    Unknown,
 }
 
 impl AsIdentifier<BlockId> for Block {
@@ -318,16 +622,36 @@ impl AsIdentifier<BlockId> for Block {
             | Heading1 { common, .. }
             | Heading2 { common, .. }
             | Heading3 { common, .. }
+            | Callout { common, .. }
+            | Quote { common, .. }
             | BulletedListItem { common, .. }
             | NumberedListItem { common, .. }
             | ToDo { common, .. }
             | Toggle { common, .. }
-            | ChildPage { common, .. }
             | Code { common, .. }
-            | Quote { common, .. }
-            | Equation { common, .. } => &common.id,
-            Unsupported {} => {
-                panic!("Trying to reference identifier for unsupported block!")
+            | ChildPage { common, .. }
+            | ChildDatabase { common, .. }
+            | Embed { common, .. }
+            | Image { common, .. }
+            | Video { common, .. }
+            | File { common, .. }
+            | Pdf { common, .. }
+            | Bookmark { common, .. }
+            | Equation { common, .. }
+            | Divider { common, .. }
+            | TableOfContents { common, .. }
+            | Breadcrumb { common, .. }
+            | ColumnList { common, .. }
+            | Column { common, .. }
+            | LinkPreview { common, .. }
+            | Template { common, .. }
+            | LinkToPage { common, .. }
+            | SyncedBlock { common, .. }
+            | Table { common, .. }
+            | TableRow { common, .. }
+            | Unsupported { common, .. } => { &common.id }
+            Unknown => {
+                panic!("Trying to reference identifier for unknown block!")
             }
         }
     }
@@ -372,27 +696,5 @@ pub enum Object {
 impl Object {
     pub fn is_database(&self) -> bool {
         matches!(self, Object::Database { .. })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::models::{ListResponse, Object, Page};
-
-    #[test]
-    fn deserialize_page() {
-        let _page: Page = serde_json::from_str(include_str!("models/tests/page.json")).unwrap();
-    }
-
-    #[test]
-    fn deserialize_query_result() {
-        let _page: ListResponse<Page> =
-            serde_json::from_str(include_str!("models/tests/query_result.json")).unwrap();
-    }
-
-    #[test]
-    fn deserialize_number_format() {
-        let _search_results: ListResponse<Object> =
-            serde_json::from_str(include_str!("models/tests/issue_15.json")).unwrap();
     }
 }
