@@ -44,7 +44,9 @@ pub struct Annotations {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct RichTextCommon {
     pub plain_text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub href: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub annotations: Option<Annotations>,
 }
 

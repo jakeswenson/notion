@@ -383,7 +383,10 @@ mod tests {
                 property: "Name".to_string(),
                 condition: RichText(TextCondition::Equals("Test".to_string())),
             })?;
-            assert_eq!(json, json!({"property":"Name","rich_text":{"equals":"Test"}}));
+            assert_eq!(
+                json,
+                json!({"property":"Name","rich_text":{"equals":"Test"}})
+            );
 
             Ok(())
         }

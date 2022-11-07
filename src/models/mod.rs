@@ -180,6 +180,12 @@ impl Properties {
     }
 }
 
+#[derive(Serialize, Debug, Eq, PartialEq)]
+pub struct PageCreateRequest {
+    pub parent: Parent,
+    pub properties: Properties,
+}
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Page {
     pub id: PageId,
