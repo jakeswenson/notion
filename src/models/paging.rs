@@ -13,5 +13,8 @@ pub struct Paging {
 }
 
 pub trait Pageable {
-    fn start_from(self, starting_point: Option<PagingCursor>) -> Self;
+    fn start_from(
+        self,
+        starting_point: Option<PagingCursor>,
+    ) -> Self;
 }
