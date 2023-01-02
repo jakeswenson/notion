@@ -15,7 +15,7 @@ where
     T: Identifier,
 {
     fn as_id(&self) -> &T {
-        &self
+        self
     }
 }
 

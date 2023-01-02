@@ -180,7 +180,10 @@ impl NotionApi {
     }
 
     /// Creates a new page and return the created page
-    pub async fn create_page<T: Into<PageCreateRequest>>(&self, page: T) -> Result<Page, Error> {
+    pub async fn create_page<T: Into<PageCreateRequest>>(
+        &self,
+        page: T,
+    ) -> Result<Page, Error> {
         let result = self
             .make_json_request(
                 self.client
