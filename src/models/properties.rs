@@ -190,8 +190,10 @@ pub enum PropertyConfiguration {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct SelectedValue {
-    pub id: SelectOptionId,
-    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<SelectOptionId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     pub color: Color,
 }
 

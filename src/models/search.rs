@@ -247,7 +247,7 @@ pub enum FormulaCondition {
 #[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum PropertyCondition {
-    Text(TextCondition),
+    RichText(TextCondition),
     Number(NumberCondition),
     Checkbox(CheckboxCondition),
     Select(SelectCondition),
@@ -376,7 +376,7 @@ impl From<NotionSearch> for SearchRequest {
 #[cfg(test)]
 mod tests {
     mod text_filters {
-        use crate::models::search::PropertyCondition::Text;
+        use crate::models::search::PropertyCondition::RichText;
         use crate::models::search::{FilterCondition, TextCondition};
         use serde_json::json;
 
@@ -384,9 +384,12 @@ mod tests {
         fn text_property_equals() -> Result<(), Box<dyn std::error::Error>> {
             let json = serde_json::to_value(&FilterCondition {
                 property: "Name".to_string(),
-                condition: Text(TextCondition::Equals("Test".to_string())),
+                condition: RichText(TextCondition::Equals("Test".to_string())),
             })?;
-            assert_eq!(json, json!({"property":"Name","text":{"equals":"Test"}}));
+            assert_eq!(
+                json,
+                json!({"property":"Name","rich_text":{"equals":"Test"}})
+            );
 
             Ok(())
         }
@@ -395,11 +398,11 @@ mod tests {
         fn text_property_contains() -> Result<(), Box<dyn std::error::Error>> {
             let json = serde_json::to_value(&FilterCondition {
                 property: "Name".to_string(),
-                condition: Text(TextCondition::Contains("Test".to_string())),
+                condition: RichText(TextCondition::Contains("Test".to_string())),
             })?;
             assert_eq!(
                 dbg!(json),
-                json!({"property":"Name","text":{"contains":"Test"}})
+                json!({"property":"Name","rich_text":{"contains":"Test"}})
             );
 
             Ok(())
@@ -409,11 +412,11 @@ mod tests {
         fn text_property_is_empty() -> Result<(), Box<dyn std::error::Error>> {
             let json = serde_json::to_value(&FilterCondition {
                 property: "Name".to_string(),
-                condition: Text(TextCondition::IsEmpty),
+                condition: RichText(TextCondition::IsEmpty),
             })?;
             assert_eq!(
                 dbg!(json),
-                json!({"property":"Name","text":{"is_empty":true}})
+                json!({"property":"Name","rich_text":{"is_empty":true}})
             );
 
             Ok(())
@@ -423,11 +426,11 @@ mod tests {
         fn text_property_is_not_empty() -> Result<(), Box<dyn std::error::Error>> {
             let json = serde_json::to_value(&FilterCondition {
                 property: "Name".to_string(),
-                condition: Text(TextCondition::IsNotEmpty),
+                condition: RichText(TextCondition::IsNotEmpty),
             })?;
             assert_eq!(
                 dbg!(json),
-                json!({"property":"Name","text":{"is_not_empty":true}})
+                json!({"property":"Name","rich_text":{"is_not_empty":true}})
             );
 
             Ok(())
