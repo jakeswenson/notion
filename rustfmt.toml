@@ -1,0 +1,17 @@
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=
+edition = "2021"
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#fn_args_layout
+fn_args_layout = "Vertical"
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#imports_granularity
+# imports_granularity = "Crate" or "Module"?
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#required_version
+# required_version = "1.5.1"
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#tab_spaces
+tab_spaces = 4
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#tab_spaces
+use_field_init_shorthand = true

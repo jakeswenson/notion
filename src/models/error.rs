@@ -12,7 +12,10 @@ impl StatusCode {
 }
 
 impl Display for StatusCode {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut Formatter<'_>,
+    ) -> std::fmt::Result {
         self.0.fmt(f)
     }
 }
@@ -46,7 +49,10 @@ pub enum ErrorCode {
 }
 
 impl Display for ErrorCode {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut Formatter<'_>,
+    ) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }

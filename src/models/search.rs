@@ -301,7 +301,10 @@ pub struct DatabaseQuery {
 }
 
 impl Pageable for DatabaseQuery {
-    fn start_from(self, starting_point: Option<PagingCursor>) -> Self {
+    fn start_from(
+        self,
+        starting_point: Option<PagingCursor>,
+    ) -> Self {
         DatabaseQuery {
             paging: Some(Paging {
                 start_cursor: starting_point,
