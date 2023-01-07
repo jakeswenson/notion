@@ -66,6 +66,22 @@ pub struct Select {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct StatusGroupOption {
+    pub name: String,
+    pub id: SelectOptionId,
+    pub color: Color,
+    pub option_ids: Vec<SelectOptionId>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+pub struct Status {
+    /// Sorted list of options available for this property.
+    pub options: Vec<SelectOption>,
+    /// Sorted list of groups available for this property.
+    pub groups: Vec<StatusGroupOption>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Formula {
     /// Formula to evaluate for this property
     pub expression: String,
@@ -87,23 +103,35 @@ pub struct Relation {
     pub synced_property_id: Option<PropertyId>,
 }
 
+/// The function used to roll up the values of the relation property.
+/// <https://developers.notion.com/reference/page-property-values#rollup>
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum RollupFunction {
-    CountAll,
-    CountValues,
-    CountUniqueValues,
-    CountEmpty,
-    CountNotEmpty,
-    PercentEmpty,
-    PercentNotEmpty,
-    Sum,
     Average,
+    Checked,
+    Count,
+    CountPerGroup,
+    CountValues,
+    DateRange,
+    EarliestDate,
+    Empty,
+    LatestDate,
+    Max,
     Median,
     Min,
-    Max,
+    NotEmpty,
+    PercentChecked,
+    PercentEmpty,
+    PercentNotEmpty,
+    PercentPerGroup,
+    PercentUnchecked,
     Range,
     ShowOriginal,
+    ShowUnique,
+    Sum,
+    Unchecked,
+    Unique,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -143,6 +171,8 @@ pub enum PropertyConfiguration {
     /// Represents a Select Property
     /// See <https://developers.notion.com/reference/database#select-configuration>
     Select { id: PropertyId, select: Select },
+    /// Represents a Status property
+    Status { id: PropertyId, status: Status },
     /// Represents a Multi-select Property
     /// See <https://developers.notion.com/reference/database#multi-select-configuration>
     MultiSelect {
@@ -250,87 +280,92 @@ pub struct FileReference {
 #[serde(tag = "type")]
 #[serde(rename_all = "snake_case")]
 pub enum PropertyValue {
-    // <https://developers.notion.com/reference/page#title-property-values>
+    // <https://developers.notion.com/reference/property-object#title-configuration>
     Title {
         id: PropertyId,
         title: Vec<RichText>,
     },
-    /// <https://developers.notion.com/reference/page#rich-text-property-values>
+    /// <https://developers.notion.com/reference/property-object#text-configuration>
     #[serde(rename = "rich_text")]
     Text {
         id: PropertyId,
         rich_text: Vec<RichText>,
     },
-    /// <https://developers.notion.com/reference/page#number-property-values>
+    /// <https://developers.notion.com/reference/property-object#number-configuration>
     Number {
         id: PropertyId,
         number: Option<Number>,
     },
-    /// <https://developers.notion.com/reference/page#select-property-values>
+    /// <https://developers.notion.com/reference/property-object#select-configuration>
     Select {
         id: PropertyId,
         select: Option<SelectedValue>,
     },
+    /// <https://developers.notion.com/reference/property-object#status-configuration>
+    Status {
+        id: PropertyId,
+        status: Option<SelectedValue>,
+    },
+    /// <https://developers.notion.com/reference/property-object#multi-select-configuration>
     MultiSelect {
         id: PropertyId,
         multi_select: Option<Vec<SelectedValue>>,
     },
+    /// <https://developers.notion.com/reference/property-object#date-configuration>
     Date {
         id: PropertyId,
         date: Option<DateValue>,
     },
-    /// <https://developers.notion.com/reference/page#formula-property-values>
+    /// <https://developers.notion.com/reference/property-object#formula-configuration>
     Formula {
         id: PropertyId,
         formula: FormulaResultValue,
     },
-    /// <https://developers.notion.com/reference/page#relation-property-values>
+    /// <https://developers.notion.com/reference/property-object#relation-configuration>
     /// It is actually an array of relations
     Relation {
         id: PropertyId,
         relation: Option<Vec<RelationValue>>,
     },
-    /// <https://developers.notion.com/reference/page#rollup-property-values>
+    /// <https://developers.notion.com/reference/property-object#rollup-configuration>
     Rollup {
         id: PropertyId,
         rollup: Option<RollupValue>,
     },
-    People {
-        id: PropertyId,
-        people: Vec<User>,
-    },
+    /// <https://developers.notion.com/reference/property-object#people-configuration>
+    People { id: PropertyId, people: Vec<User> },
+    /// <https://developers.notion.com/reference/property-object#files-configuration>
     Files {
         id: PropertyId,
         files: Option<Vec<FileReference>>,
     },
-    Checkbox {
-        id: PropertyId,
-        checkbox: bool,
-    },
-    Url {
-        id: PropertyId,
-        url: Option<String>,
-    },
+    /// <https://developers.notion.com/reference/property-object#checkbox-configuration>
+    Checkbox { id: PropertyId, checkbox: bool },
+    /// <https://developers.notion.com/reference/property-object#url-configuration>
+    Url { id: PropertyId, url: Option<String> },
+    /// <https://developers.notion.com/reference/property-object#email-configuration>
     Email {
         id: PropertyId,
         email: Option<String>,
     },
+    /// <https://developers.notion.com/reference/property-object#phone-number-configuration>
     PhoneNumber {
         id: PropertyId,
         phone_number: String,
     },
+    /// <https://developers.notion.com/reference/property-object#created-time-configuration>
     CreatedTime {
         id: PropertyId,
         created_time: DateTime<Utc>,
     },
-    CreatedBy {
-        id: PropertyId,
-        created_by: User,
-    },
+    /// <https://developers.notion.com/reference/property-object#created-by-configuration>
+    CreatedBy { id: PropertyId, created_by: User },
+    /// <https://developers.notion.com/reference/property-object#last-edited-time-configuration>
     LastEditedTime {
         id: PropertyId,
         last_edited_time: DateTime<Utc>,
     },
+    /// <https://developers.notion.com/reference/property-object#last-edited-by-configuration>
     LastEditedBy {
         id: PropertyId,
         last_edited_by: User,
@@ -354,6 +389,9 @@ pub enum RollupPropertyValue {
     /// <https://developers.notion.com/reference/page#select-property-values>
     Select {
         select: Option<SelectedValue>,
+    },
+    Status {
+        status: Option<SelectedValue>,
     },
     MultiSelect {
         multi_select: Option<Vec<SelectedValue>>,
