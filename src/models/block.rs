@@ -462,3 +462,152 @@ impl AsIdentifier<BlockId> for Block {
         }
     }
 }
+
+impl Into<CreateBlock> for Block {
+    fn into(self) -> CreateBlock {
+        match self {
+            Block::Paragraph { paragraph, .. } => CreateBlock::Paragraph { paragraph },
+            Block::Heading1 { heading_1, .. } => CreateBlock::Heading1 { heading_1 },
+            Block::Heading2 { heading_2, .. } => CreateBlock::Heading2 { heading_2 },
+            Block::Heading3 { heading_3, .. } => CreateBlock::Heading3 { heading_3 },
+            Block::Callout { callout, .. } => CreateBlock::Callout { callout },
+            Block::Quote { quote, .. } => CreateBlock::Quote { quote },
+            Block::BulletedListItem {
+                bulleted_list_item, ..
+            } => CreateBlock::BulletedListItem { bulleted_list_item },
+            Block::NumberedListItem {
+                numbered_list_item, ..
+            } => CreateBlock::NumberedListItem { numbered_list_item },
+            Block::ToDo { to_do, .. } => CreateBlock::ToDo { to_do },
+            Block::Toggle { toggle, .. } => CreateBlock::Toggle { toggle },
+            Block::Code { code, .. } => CreateBlock::Code { code },
+            Block::ChildPage { child_page, .. } => CreateBlock::ChildPage { child_page },
+            Block::ChildDatabase { child_page, .. } => CreateBlock::ChildDatabase { child_page },
+            Block::Embed { embed, .. } => CreateBlock::Embed { embed },
+            Block::Image { image, .. } => CreateBlock::Image { image },
+            Block::Video { video, .. } => CreateBlock::Video { video },
+            Block::File { file, caption, .. } => CreateBlock::File { file, caption },
+            Block::Pdf { pdf, .. } => CreateBlock::Pdf { pdf },
+            Block::Bookmark { bookmark, .. } => CreateBlock::Bookmark { bookmark },
+            Block::Equation { equation, .. } => CreateBlock::Equation { equation },
+            Block::Divider { .. } => CreateBlock::Divider {},
+            Block::TableOfContents {
+                table_of_contents, ..
+            } => CreateBlock::TableOfContents { table_of_contents },
+            Block::Breadcrumb { .. } => CreateBlock::Breadcrumb {},
+            Block::ColumnList { column_list, .. } => CreateBlock::ColumnList { column_list },
+            Block::Column { column, .. } => CreateBlock::Column { column },
+
+            Block::LinkPreview { link_preview, .. } => CreateBlock::LinkPreview { link_preview },
+            Block::Template { template, .. } => CreateBlock::Template { template },
+            Block::LinkToPage { link_to_page, .. } => CreateBlock::LinkToPage { link_to_page },
+            Block::Table { table, .. } => CreateBlock::Table { table },
+            Block::SyncedBlock { synced_block, .. } => CreateBlock::SyncedBlock { synced_block },
+            Block::TableRow { table_row, .. } => CreateBlock::TableRow { table_row },
+            Block::Unsupported { .. } => CreateBlock::Unsupported,
+            Block::Unknown => CreateBlock::Unknown,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum CreateBlock {
+    Paragraph {
+        paragraph: TextAndChildren,
+    },
+    #[serde(rename = "heading_1")]
+    Heading1 {
+        heading_1: Text,
+    },
+    #[serde(rename = "heading_2")]
+    Heading2 {
+        heading_2: Text,
+    },
+    #[serde(rename = "heading_3")]
+    Heading3 {
+        heading_3: Text,
+    },
+    Callout {
+        callout: Callout,
+    },
+    Quote {
+        quote: TextAndChildren,
+    },
+    BulletedListItem {
+        bulleted_list_item: TextAndChildren,
+    },
+    NumberedListItem {
+        numbered_list_item: TextAndChildren,
+    },
+    ToDo {
+        to_do: ToDoFields,
+    },
+    Toggle {
+        toggle: TextAndChildren,
+    },
+    Code {
+        code: CodeFields,
+    },
+    ChildPage {
+        child_page: ChildPageFields,
+    },
+    ChildDatabase {
+        child_page: ChildDatabaseFields,
+    },
+    Embed {
+        embed: EmbedFields,
+    },
+    Image {
+        image: FileObject,
+    },
+    Video {
+        video: FileObject,
+    },
+    File {
+        file: FileObject,
+        caption: Text,
+    },
+    Pdf {
+        pdf: FileObject,
+    },
+    Bookmark {
+        bookmark: BookmarkFields,
+    },
+    Equation {
+        equation: Equation,
+    },
+    Divider,
+    TableOfContents {
+        table_of_contents: TableOfContents,
+    },
+    Breadcrumb,
+    ColumnList {
+        column_list: ColumnListFields,
+    },
+    Column {
+        column: ColumnFields,
+    },
+    LinkPreview {
+        link_preview: LinkPreviewFields,
+    },
+    Template {
+        template: TemplateFields,
+    },
+    LinkToPage {
+        link_to_page: LinkToPageFields,
+    },
+    Table {
+        table: TableFields,
+    },
+    SyncedBlock {
+        synced_block: SyncedBlockFields,
+    },
+    TableRow {
+        table_row: TableRowFields,
+    },
+    Unsupported,
+    #[serde(other)]
+    Unknown,
+}

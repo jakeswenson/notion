@@ -186,6 +186,8 @@ impl Properties {
 pub struct PageCreateRequest {
     pub parent: Parent,
     pub properties: Properties,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub children: Option<Vec<CreateBlock>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
