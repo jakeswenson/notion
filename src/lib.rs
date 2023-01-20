@@ -1,8 +1,9 @@
 use crate::ids::{BlockId, DatabaseId};
 use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
-use crate::models::{Block, Database, ListResponse, Object, Page};
+use crate::models::{Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
+use models::block::Block;
 use models::PageCreateRequest;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};

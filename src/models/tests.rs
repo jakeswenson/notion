@@ -1,14 +1,14 @@
-use crate::ids::UserId;
+use crate::ids::{BlockId, UserId};
+use crate::models::block::{
+    Block, BlockCommon, Callout, ExternalFileObject, FileOrEmojiObject, InternalFileObject,
+    Text as TextBlockModel,
+};
 use crate::models::properties::{DateOrDateTime, DateValue};
 use crate::models::text::{
     Annotations, Link, MentionObject, RichText, RichTextCommon, Text, TextColor,
 };
 use crate::models::users::{Person, User, UserCommon};
-use crate::models::{
-    BlockCommon, Callout, ExternalFileObject, FileOrEmojiObject, InternalFileObject, ListResponse,
-    Object, Page,
-};
-use crate::{models, Block, BlockId};
+use crate::models::{ListResponse, Object, Page};
 use chrono::{DateTime, NaiveDate};
 use std::str::FromStr;
 
@@ -249,7 +249,7 @@ fn heading_1() {
                     avatar_url: None,
                 },
             },
-            heading_1: models::Text {
+            heading_1: TextBlockModel {
                 rich_text: vec![
                     RichText::Text {
                         rich_text: RichTextCommon {
