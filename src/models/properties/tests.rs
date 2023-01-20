@@ -1,4 +1,7 @@
-use super::{DateOrDateTime, PropertyValue, RollupPropertyValue, RollupValue};
+use crate::models::{
+    properties::{DateOrDateTime, RollupPropertyValue, RollupValue},
+    PropertyValue,
+};
 use chrono::NaiveDate;
 
 #[test]

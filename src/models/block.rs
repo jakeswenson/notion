@@ -2,11 +2,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
+use crate::models::text::{RichText, TextColor};
+use crate::models::users::UserCommon;
 
-use super::{
-    text::{RichText, TextColor},
-    users::UserCommon,
-};
+mod tests;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct BlockCommon {
