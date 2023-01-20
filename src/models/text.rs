@@ -110,6 +110,7 @@ pub enum RichText {
         #[serde(flatten)]
         rich_text: RichTextCommon,
         mention: MentionObject,
+        href: Option<String>,
     },
     /// See <https://developers.notion.com/reference/rich-text#equation-objects>
     Equation {
