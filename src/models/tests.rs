@@ -1,3 +1,7 @@
+use std::str::FromStr;
+use time::format_description::well_known::Iso8601;
+use time::{Date, Month, OffsetDateTime};
+
 use crate::ids::UserId;
 use crate::models::properties::{DateOrDateTime, DateValue};
 use crate::models::text::{
@@ -9,8 +13,6 @@ use crate::models::{
     Object, Page,
 };
 use crate::{models, Block, BlockId};
-use chrono::{DateTime, NaiveDate};
-use std::str::FromStr;
 
 #[test]
 fn deserialize_page() {
@@ -117,7 +119,9 @@ fn rich_text_mention_date() {
             },
             mention: MentionObject::Date {
                 date: DateValue {
-                    start: DateOrDateTime::Date(NaiveDate::from_str("2022-04-16").unwrap()),
+                    start: DateOrDateTime::Date(
+                        Date::from_calendar_date(2022, Month::April, 16).unwrap()
+                    ),
                     end: None,
                     time_zone: None,
                 }
@@ -148,7 +152,8 @@ fn rich_text_mention_date_with_time() {
             mention: MentionObject::Date {
                 date: DateValue {
                     start: DateOrDateTime::DateTime(
-                        DateTime::from_str("2022-05-14T09:00:00.000-04:00").unwrap()
+                        OffsetDateTime::parse("2022-05-14T09:00:00.000-04:00", &Iso8601::DEFAULT)
+                            .unwrap()
                     ),
                     end: None,
                     time_zone: None,
@@ -179,9 +184,11 @@ fn rich_text_mention_date_with_end() {
             },
             mention: MentionObject::Date {
                 date: DateValue {
-                    start: DateOrDateTime::Date(NaiveDate::from_str("2022-05-12").unwrap()),
+                    start: DateOrDateTime::Date(
+                        Date::from_calendar_date(2022, Month::May, 12).unwrap()
+                    ),
                     end: Some(DateOrDateTime::Date(
-                        NaiveDate::from_str("2022-05-13").unwrap()
+                        Date::from_calendar_date(2022, Month::May, 13).unwrap()
                     )),
                     time_zone: None,
                 }
@@ -215,10 +222,12 @@ fn rich_text_mention_date_with_end_and_time() {
             mention: MentionObject::Date {
                 date: DateValue {
                     start: DateOrDateTime::DateTime(
-                        DateTime::from_str("2022-04-16T12:00:00.000-04:00").unwrap()
+                        OffsetDateTime::parse("2022-04-16T12:00:00.000-04:00", &Iso8601::DEFAULT)
+                            .unwrap()
                     ),
                     end: Some(DateOrDateTime::DateTime(
-                        DateTime::from_str("2022-04-16T12:00:00.000-04:00").unwrap()
+                        OffsetDateTime::parse("2022-04-16T12:00:00.000-04:00", &Iso8601::DEFAULT)
+                            .unwrap()
                     )),
                     time_zone: None,
                 }
@@ -235,8 +244,13 @@ fn heading_1() {
         Block::Heading1 {
             common: BlockCommon {
                 id: BlockId::from_str("9e891834-6a03-475c-a2b8-421e17f0f3aa").unwrap(),
-                created_time: DateTime::from_str("2022-05-12T21:15:00.000Z").unwrap(),
-                last_edited_time: DateTime::from_str("2022-05-12T22:10:00.000Z").unwrap(),
+                created_time: OffsetDateTime::parse("2022-05-12T21:15:00.000Z", &Iso8601::DEFAULT)
+                    .unwrap(),
+                last_edited_time: OffsetDateTime::parse(
+                    "2022-05-12T22:10:00.000Z",
+                    &Iso8601::DEFAULT
+                )
+                .unwrap(),
                 has_children: false,
                 created_by: UserCommon {
                     id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
@@ -438,7 +452,7 @@ fn file_object() {
     assert_eq!(file_object, FileOrEmojiObject::File {
         file: InternalFileObject {
             url: "https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2703e742-ace5-428c-a74d-1c587ceddc32/DiRT_Rally.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220513%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220513T201035Z&X-Amz-Expires=3600&X-Amz-Signature=714b49bde0b499fb8f3aae1a88a8cbd374f2b09c1d128e91cac49e85ce0e00fb&X-Amz-SignedHeaders=host&x-id=GetObject".to_string(),
-            expiry_time: DateTime::from_str("2022-05-13T21:10:35.817Z").unwrap(),
+            expiry_time: OffsetDateTime::parse("2022-05-13T21:10:35.817Z", &Iso8601::DEFAULT).unwrap(),
         }
     })
 }
@@ -466,8 +480,16 @@ fn callout() {
             block: Block::Callout {
                 common: BlockCommon {
                     id: BlockId::from_str("00e8829a-a7b8-4075-884a-8f53be145d2f").unwrap(),
-                    created_time: DateTime::from_str("2022-05-13T20:08:00.000Z").unwrap(),
-                    last_edited_time: DateTime::from_str("2022-05-13T20:08:00.000Z").unwrap(),
+                    created_time: OffsetDateTime::parse(
+                        "2022-05-13T20:08:00.000Z",
+                        &Iso8601::DEFAULT
+                    )
+                    .unwrap(),
+                    last_edited_time: OffsetDateTime::parse(
+                        "2022-05-13T20:08:00.000Z",
+                        &Iso8601::DEFAULT
+                    )
+                    .unwrap(),
                     has_children: true,
                     created_by: UserCommon {
                         id: UserId::from_str("e2507360-468c-4e0f-a928-7bbcbbb45353").unwrap(),

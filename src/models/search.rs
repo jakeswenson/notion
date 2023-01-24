@@ -1,9 +1,9 @@
 use crate::ids::{PageId, UserId};
 use crate::models::paging::{Pageable, Paging, PagingCursor};
 use crate::models::Number;
-use chrono::{DateTime, Utc};
 use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
+use time::OffsetDateTime;
 
 #[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -144,23 +144,28 @@ pub enum DateCondition {
     /// Only return pages where the page property value matches the provided date exactly.
     /// Note that the comparison is done against the date.
     /// Any time information sent will be ignored.
-    Equals(DateTime<Utc>),
+    #[serde(with = "time::serde::iso8601")]
+    Equals(OffsetDateTime),
     /// Only return pages where the page property value is before the provided date.
     /// Note that the comparison is done against the date.
     /// Any time information sent will be ignored.
-    Before(DateTime<Utc>),
+    #[serde(with = "time::serde::iso8601")]
+    Before(OffsetDateTime),
     /// Only return pages where the page property value is after the provided date.
     /// Note that the comparison is done against the date.
     /// Any time information sent will be ignored.
-    After(DateTime<Utc>),
+    #[serde(with = "time::serde::iso8601")]
+    After(OffsetDateTime),
     /// Only return pages where the page property value is on or before the provided date.
     /// Note that the comparison is done against the date.
     /// Any time information sent will be ignored.
-    OnOrBefore(DateTime<Utc>),
+    #[serde(with = "time::serde::iso8601")]
+    OnOrBefore(OffsetDateTime),
     /// Only return pages where the page property value is on or after the provided date.
     /// Note that the comparison is done against the date.
     /// Any time information sent will be ignored.
-    OnOrAfter(DateTime<Utc>),
+    #[serde(with = "time::serde::iso8601")]
+    OnOrAfter(OffsetDateTime),
     /// Only return pages where the page property value is empty.
     #[serde(serialize_with = "serialize_to_true")]
     IsEmpty,

@@ -12,12 +12,12 @@ use crate::models::text::{RichText, TextColor};
 use crate::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use time::OffsetDateTime;
 
 use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
 use crate::models::users::{User, UserCommon};
-pub use chrono::{DateTime, Utc};
 pub use serde_json::value::Number;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Copy, Clone)]
@@ -34,9 +34,11 @@ pub struct Database {
     /// Unique identifier for the database.
     pub id: DatabaseId,
     /// Date and time when this database was created.
-    pub created_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    pub created_time: OffsetDateTime,
     /// Date and time when this database was updated.
-    pub last_edited_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    pub last_edited_time: OffsetDateTime,
     /// Name of the database as it appears in Notion.
     pub title: Vec<RichText>,
     /// Schema of properties for the database as they appear in Notion.
@@ -190,9 +192,11 @@ pub struct PageCreateRequest {
 pub struct Page {
     pub id: PageId,
     /// Date and time when this page was created.
-    pub created_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    pub created_time: OffsetDateTime,
     /// Date and time when this page was updated.
-    pub last_edited_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    pub last_edited_time: OffsetDateTime,
     /// The archived status of the page.
     pub archived: bool,
     pub properties: Properties,
@@ -208,8 +212,10 @@ impl Page {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct BlockCommon {
     pub id: BlockId,
-    pub created_time: DateTime<Utc>,
-    pub last_edited_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    pub created_time: OffsetDateTime,
+    #[serde(with = "time::serde::iso8601")]
+    pub last_edited_time: OffsetDateTime,
     pub has_children: bool,
     pub created_by: UserCommon,
     pub last_edited_by: UserCommon,
@@ -230,7 +236,8 @@ pub struct Text {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct InternalFileObject {
     url: String,
-    expiry_time: DateTime<Utc>,
+    #[serde(with = "time::serde::iso8601")]
+    expiry_time: OffsetDateTime,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]

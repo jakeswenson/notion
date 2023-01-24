@@ -1,5 +1,7 @@
 mod commands;
 
+use std::convert::TryInto;
+
 use anyhow::{Context, Result};
 use clap::Parser;
 use notion::ids::DatabaseId;
