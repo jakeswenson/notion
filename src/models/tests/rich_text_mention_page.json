@@ -1,0 +1,19 @@
+{
+  "type": "mention",
+  "mention": {
+    "type": "page",
+    "page": {
+      "id": "c81ee776-2752-4e98-aa66-c37bd4ba9b8d"
+    }
+  },
+  "annotations": {
+    "bold": false,
+    "italic": false,
+    "strikethrough": false,
+    "underline": false,
+    "code": false,
+    "color": "default"
+  },
+  "plain_text": "Shopping List 2023-01-20 ",
+  "href": "https://www.notion.so/c81ee77627524e98aa66c37bd4ba9b8d"
+}

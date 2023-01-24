@@ -1,0 +1,19 @@
+{
+  "type": "mention",
+  "mention": {
+    "type": "database",
+    "database": {
+      "id": "baa9d745-9325-4088-a992-721dc2fa21dd"
+    }
+  },
+  "annotations": {
+    "bold": false,
+    "italic": false,
+    "strikethrough": false,
+    "underline": false,
+    "code": false,
+    "color": "default"
+  },
+  "plain_text": "Shopping lists",
+  "href": "https://www.notion.so/baa9d74593254088a992721dc2fa21dd"
+}

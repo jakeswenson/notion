@@ -1,7 +1,7 @@
-use crate::ids::UserId;
+use crate::ids::{DatabaseId, PageId, UserId};
 use crate::models::properties::{DateOrDateTime, DateValue};
 use crate::models::text::{
-    Annotations, Link, MentionObject, RichText, RichTextCommon, Text, TextColor,
+    Annotations, Link, MentionId, MentionObject, RichText, RichTextCommon, Text, TextColor,
 };
 use crate::models::users::{Person, User, UserCommon};
 use crate::models::{
@@ -92,6 +92,7 @@ fn rich_text_mention_user_person() {
           },
         }
       },
+      href: None,
     }
   )
 }
@@ -122,6 +123,7 @@ fn rich_text_mention_date() {
                     time_zone: None,
                 }
             },
+            href: None,
         }
     )
 }
@@ -154,6 +156,7 @@ fn rich_text_mention_date_with_time() {
                     time_zone: None,
                 }
             },
+            href: None,
         }
     )
 }
@@ -186,6 +189,7 @@ fn rich_text_mention_date_with_end() {
                     time_zone: None,
                 }
             },
+            href: None,
         }
     )
 }
@@ -223,8 +227,67 @@ fn rich_text_mention_date_with_end_and_time() {
                     time_zone: None,
                 }
             },
+            href: None,
         }
     )
+}
+
+#[test]
+fn rich_text_mention_page() {
+    let rich_text_mention_page: RichText =
+        serde_json::from_str(include_str!("tests/rich_text_mention_page.json")).unwrap();
+    assert_eq!(
+        rich_text_mention_page,
+        RichText::Mention {
+            rich_text: RichTextCommon {
+                plain_text: "Shopping List 2023-01-20 ".to_string(),
+                href: None,
+                annotations: Some(Annotations {
+                    bold: Some(false),
+                    code: Some(false),
+                    color: Some(TextColor::Default),
+                    italic: Some(false),
+                    strikethrough: Some(false),
+                    underline: Some(false),
+                }),
+            },
+            mention: MentionObject::Page {
+                page: MentionId {
+                    id: PageId::from_str("c81ee776-2752-4e98-aa66-c37bd4ba9b8d").unwrap()
+                }
+            },
+            href: Some("https://www.notion.so/c81ee77627524e98aa66c37bd4ba9b8d".to_string())
+        }
+    );
+}
+
+#[test]
+fn rich_text_mention_database() {
+    let rich_text_mention_database: RichText =
+        serde_json::from_str(include_str!("tests/rich_text_mention_database.json")).unwrap();
+    assert_eq!(
+        rich_text_mention_database,
+        RichText::Mention {
+            rich_text: RichTextCommon {
+                plain_text: "Shopping lists".to_string(),
+                href: None,
+                annotations: Some(Annotations {
+                    bold: Some(false),
+                    code: Some(false),
+                    color: Some(TextColor::Default),
+                    italic: Some(false),
+                    strikethrough: Some(false),
+                    underline: Some(false),
+                }),
+            },
+            href: Some("https://www.notion.so/baa9d74593254088a992721dc2fa21dd".to_string()),
+            mention: MentionObject::Database {
+                database: MentionId {
+                    id: DatabaseId::from_str("baa9d745-9325-4088-a992-721dc2fa21dd").unwrap()
+                }
+            },
+        }
+    );
 }
 
 #[test]
