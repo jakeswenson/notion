@@ -12,13 +12,13 @@ use crate::models::text::{RichText, TextColor};
 use crate::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use time::OffsetDateTime;
 
 use crate::ids::{AsIdentifier, BlockId, DatabaseId, PageId};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
 use crate::models::users::{User, UserCommon};
 pub use serde_json::value::Number;
+pub use time::{Date, OffsetDateTime};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
