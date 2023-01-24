@@ -1,10 +1,10 @@
 use crate::models::text::RichText;
 use crate::models::users::User;
 
-use super::{DateTime, Number, Utc};
+use super::Number;
 use crate::ids::{DatabaseId, PageId, PropertyId};
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
+use time::{Date, OffsetDateTime};
 
 pub mod formulas;
 
@@ -230,8 +230,9 @@ pub struct SelectedValue {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum DateOrDateTime {
-    Date(NaiveDate),
-    DateTime(DateTime<Utc>),
+    Date(Date),
+    #[serde(with = "time::serde::iso8601")]
+    DateTime(OffsetDateTime),
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -265,7 +266,7 @@ pub struct RelationValue {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum RollupValue {
     Number { number: Option<Number> },
-    Date { date: Option<DateTime<Utc>> },
+    Date { date: Option<OffsetDateTime> },
     Array { array: Vec<RollupPropertyValue> },
 }
 
@@ -356,14 +357,16 @@ pub enum PropertyValue {
     /// <https://developers.notion.com/reference/property-object#created-time-configuration>
     CreatedTime {
         id: PropertyId,
-        created_time: DateTime<Utc>,
+        #[serde(with = "time::serde::iso8601")]
+        created_time: OffsetDateTime,
     },
     /// <https://developers.notion.com/reference/property-object#created-by-configuration>
     CreatedBy { id: PropertyId, created_by: User },
     /// <https://developers.notion.com/reference/property-object#last-edited-time-configuration>
     LastEditedTime {
         id: PropertyId,
-        last_edited_time: DateTime<Utc>,
+        #[serde(with = "time::serde::iso8601")]
+        last_edited_time: OffsetDateTime,
     },
     /// <https://developers.notion.com/reference/property-object#last-edited-by-configuration>
     LastEditedBy {
@@ -431,13 +434,15 @@ pub enum RollupPropertyValue {
         phone_number: String,
     },
     CreatedTime {
-        created_time: DateTime<Utc>,
+        #[serde(with = "time::serde::iso8601")]
+        created_time: OffsetDateTime,
     },
     CreatedBy {
         created_by: User,
     },
     LastEditedTime {
-        last_edited_time: DateTime<Utc>,
+        #[serde(with = "time::serde::iso8601")]
+        last_edited_time: OffsetDateTime,
     },
     LastEditedBy {
         last_edited_by: User,
