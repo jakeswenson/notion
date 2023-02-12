@@ -516,7 +516,7 @@ pub enum Block {
     ChildDatabase {
         #[serde(flatten)]
         common: BlockCommon,
-        child_page: ChildDatabaseFields,
+        child_database: ChildDatabaseFields,
     },
     Embed {
         #[serde(flatten)]
