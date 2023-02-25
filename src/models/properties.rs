@@ -1,8 +1,8 @@
 use crate::models::text::RichText;
 use crate::models::users::User;
 
-use super::{DateTime, Number, Utc};
 use crate::ids::{DatabaseId, PageId, PropertyId};
+use crate::models::{DateTime, Number, Utc};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
