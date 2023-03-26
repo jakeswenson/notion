@@ -29,7 +29,7 @@ pub enum TextColor {
 
 /// Rich text annotations
 /// See <https://developers.notion.com/reference/rich-text#annotations>
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Default)]
 pub struct Annotations {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bold: Option<bool>,
@@ -47,7 +47,7 @@ pub struct Annotations {
 
 /// Properties common on all rich text objects
 /// See <https://developers.notion.com/reference/rich-text#all-rich-text>
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Default)]
 pub struct RichTextCommon {
     pub plain_text: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -61,7 +61,7 @@ pub struct Link {
     pub url: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Default)]
 pub struct Text {
     pub content: String,
     #[serde(skip_serializing_if = "Option::is_none")]
