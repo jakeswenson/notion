@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UserCommon {
     pub id: UserId,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub avatar_url: Option<String>,
 }
 
