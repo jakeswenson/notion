@@ -190,6 +190,11 @@ pub struct PageCreateRequest {
     pub children: Option<Vec<CreateBlock>>,
 }
 
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+pub struct UpdateBlockChildrenRequest {
+    pub children: Vec<CreateBlock>,
+}
+
 #[derive(Serialize, Debug, Eq, PartialEq)]
 pub struct PageUpdateRequest {
     pub properties: Properties,
