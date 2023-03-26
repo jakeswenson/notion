@@ -182,7 +182,7 @@ impl Properties {
     }
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 pub struct PageCreateRequest {
     pub parent: Parent,
     pub properties: Properties,

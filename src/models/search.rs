@@ -44,7 +44,7 @@ pub struct Filter {
     value: FilterValue,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Default)]
+#[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct SearchRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     query: Option<String>,
@@ -54,6 +54,21 @@ pub struct SearchRequest {
     filter: Option<Filter>,
     #[serde(flatten)]
     paging: Option<Paging>,
+}
+
+impl Pageable for SearchRequest {
+    fn start_from(
+        self,
+        starting_point: Option<PagingCursor>,
+    ) -> Self {
+        SearchRequest {
+            paging: Some(Paging {
+                start_cursor: starting_point,
+                page_size: self.paging.and_then(|p| p.page_size),
+            }),
+            ..self
+        }
+    }
 }
 
 #[derive(Serialize, Debug, Eq, PartialEq, Clone)]
@@ -318,7 +333,7 @@ impl Pageable for DatabaseQuery {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum NotionSearch {
     /// When supplied, limits which pages are returned by comparing the query to the page title.
     Query(String),
