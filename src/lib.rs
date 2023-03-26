@@ -3,7 +3,7 @@ use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
-use models::block::Block;
+use models::block::{Block, CreateBlock};
 use models::paging::PagingCursor;
 use models::{PageCreateRequest, PageUpdateRequest, UpdateBlockChildrenRequest};
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -349,6 +349,37 @@ impl NotionApi {
                 "https://api.notion.com/v1/blocks/{block_id}",
                 block_id = block_id.as_id()
             )))
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Update a block by [BlockId].
+    pub async fn update_block<P, T>(
+        &self,
+        block_id: P,
+        block: T,
+    ) -> Result<Block, Error>
+    where
+        P: AsIdentifier<BlockId>,
+        T: Into<CreateBlock>,
+    {
+        // using CreateBlock is not perfect
+        // technically speaking you can update text on a todo block and not touch checked by not settings it
+        // but I don't want to create a new type for this
+        // or make checked optional in CreateBlock
+        let result = self
+            .make_json_request(
+                self.client
+                    .patch(&format!(
+                        "https://api.notion.com/v1/blocks/{block_id}",
+                        block_id = block_id.as_id()
+                    ))
+                    .json(&block.into()),
+            )
             .await?;
 
         match result {
