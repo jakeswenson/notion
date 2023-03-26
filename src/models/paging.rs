@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Clone)]
 #[serde(transparent)]
-pub struct PagingCursor(String);
+pub struct PagingCursor(pub(crate) String);
 
 #[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct Paging {

@@ -4,6 +4,7 @@ use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
 use models::block::Block;
+use models::paging::PagingCursor;
 use models::{PageCreateRequest, PageUpdateRequest, UpdateBlockChildrenRequest};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
@@ -280,6 +281,29 @@ impl NotionApi {
                 "https://api.notion.com/v1/blocks/{block_id}/children",
                 block_id = block_id.as_id()
             )))
+            .await?;
+
+        match result {
+            Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Get block children a block by [BlockId].
+    pub async fn get_block_children_with_cursor<T: AsIdentifier<BlockId>>(
+        &self,
+        block_id: T,
+        cursor: PagingCursor,
+    ) -> Result<ListResponse<Block>, Error> {
+        let result = self
+            .make_json_request(
+                self.client
+                    .get(&format!(
+                        "https://api.notion.com/v1/blocks/{block_id}/children",
+                        block_id = block_id.as_id()
+                    ))
+                    .query(&[("start_cursor", cursor.0)]),
+            )
             .await?;
 
         match result {
