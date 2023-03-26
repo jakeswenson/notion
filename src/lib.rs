@@ -4,7 +4,7 @@ use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
 use models::block::Block;
-use models::PageCreateRequest;
+use models::{PageCreateRequest, PageUpdateRequest};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use tracing::Instrument;
@@ -189,6 +189,33 @@ impl NotionApi {
             .make_json_request(
                 self.client
                     .post("https://api.notion.com/v1/pages")
+                    .json(&page.into()),
+            )
+            .await?;
+
+        match result {
+            Object::Page { page } => Ok(page),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Updates a page and return the updated page
+    pub async fn update_page<P, T>(
+        &self,
+        page_id: P,
+        page: T,
+    ) -> Result<Page, Error>
+    where
+        P: AsIdentifier<PageId>,
+        T: Into<PageUpdateRequest>,
+    {
+        let result = self
+            .make_json_request(
+                self.client
+                    .patch(&format!(
+                        "https://api.notion.com/v1/pages/{page_id}",
+                        page_id = page_id.as_id()
+                    ))
                     .json(&page.into()),
             )
             .await?;
