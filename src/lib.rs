@@ -252,6 +252,25 @@ impl NotionApi {
         }
     }
 
+    /// Get a block by [BlockId].
+    pub async fn get_block<T: AsIdentifier<BlockId>>(
+        &self,
+        page_id: T,
+    ) -> Result<Block, Error> {
+        let result = self
+            .make_json_request(self.client.get(format!(
+                "https://api.notion.com/v1/blocks/{}",
+                page_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Get block children a block by [BlockId].
     pub async fn get_block_children<T: AsIdentifier<BlockId>>(
         &self,
         block_id: T,
@@ -269,6 +288,7 @@ impl NotionApi {
         }
     }
 
+    /// Append block children under a block by [BlockId].
     pub async fn append_block_children<P, T>(
         &self,
         block_id: P,
@@ -295,6 +315,7 @@ impl NotionApi {
         }
     }
 
+    /// Delete a block by [BlockId].
     pub async fn delete_block<T: AsIdentifier<BlockId>>(
         &self,
         block_id: T,
