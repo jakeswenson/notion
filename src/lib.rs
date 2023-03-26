@@ -294,4 +294,21 @@ impl NotionApi {
             response => Err(Error::UnexpectedResponse { response }),
         }
     }
+
+    pub async fn delete_block<T: AsIdentifier<BlockId>>(
+        &self,
+        block_id: T,
+    ) -> Result<Block, Error> {
+        let result = self
+            .make_json_request(self.client.delete(&format!(
+                "https://api.notion.com/v1/blocks/{block_id}",
+                block_id = block_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
 }
