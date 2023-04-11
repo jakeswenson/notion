@@ -3,8 +3,9 @@ use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Database, ListResponse, Object, Page};
 use ids::{AsIdentifier, PageId};
-use models::block::Block;
-use models::PageCreateRequest;
+use models::block::{Block, CreateBlock};
+use models::paging::PagingCursor;
+use models::{PageCreateRequest, PageUpdateRequest, UpdateBlockChildrenRequest};
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{header, Client, ClientBuilder, RequestBuilder};
 use tracing::Instrument;
@@ -199,6 +200,33 @@ impl NotionApi {
         }
     }
 
+    /// Updates a page and return the updated page
+    pub async fn update_page<P, T>(
+        &self,
+        page_id: P,
+        page: T,
+    ) -> Result<Page, Error>
+    where
+        P: AsIdentifier<PageId>,
+        T: Into<PageUpdateRequest>,
+    {
+        let result = self
+            .make_json_request(
+                self.client
+                    .patch(&format!(
+                        "https://api.notion.com/v1/pages/{page_id}",
+                        page_id = page_id.as_id()
+                    ))
+                    .json(&page.into()),
+            )
+            .await?;
+
+        match result {
+            Object::Page { page } => Ok(page),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
     /// Query a database and return the matching pages.
     pub async fn query_database<D, T>(
         &self,
@@ -225,6 +253,25 @@ impl NotionApi {
         }
     }
 
+    /// Get a block by [BlockId].
+    pub async fn get_block<T: AsIdentifier<BlockId>>(
+        &self,
+        page_id: T,
+    ) -> Result<Block, Error> {
+        let result = self
+            .make_json_request(self.client.get(format!(
+                "https://api.notion.com/v1/blocks/{}",
+                page_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Get block children a block by [BlockId].
     pub async fn get_block_children<T: AsIdentifier<BlockId>>(
         &self,
         block_id: T,
@@ -238,6 +285,105 @@ impl NotionApi {
 
         match result {
             Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Get block children a block by [BlockId].
+    pub async fn get_block_children_with_cursor<T: AsIdentifier<BlockId>>(
+        &self,
+        block_id: T,
+        cursor: PagingCursor,
+    ) -> Result<ListResponse<Block>, Error> {
+        let result = self
+            .make_json_request(
+                self.client
+                    .get(&format!(
+                        "https://api.notion.com/v1/blocks/{block_id}/children",
+                        block_id = block_id.as_id()
+                    ))
+                    .query(&[("start_cursor", cursor.0)]),
+            )
+            .await?;
+
+        match result {
+            Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Append block children under a block by [BlockId].
+    pub async fn append_block_children<P, T>(
+        &self,
+        block_id: P,
+        request: T,
+    ) -> Result<ListResponse<Block>, Error>
+    where
+        P: AsIdentifier<BlockId>,
+        T: Into<UpdateBlockChildrenRequest>,
+    {
+        let result = self
+            .make_json_request(
+                self.client
+                    .patch(&format!(
+                        "https://api.notion.com/v1/blocks/{block_id}/children",
+                        block_id = block_id.as_id()
+                    ))
+                    .json(&request.into()),
+            )
+            .await?;
+
+        match result {
+            Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Delete a block by [BlockId].
+    pub async fn delete_block<T: AsIdentifier<BlockId>>(
+        &self,
+        block_id: T,
+    ) -> Result<Block, Error> {
+        let result = self
+            .make_json_request(self.client.delete(&format!(
+                "https://api.notion.com/v1/blocks/{block_id}",
+                block_id = block_id.as_id()
+            )))
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    /// Update a block by [BlockId].
+    pub async fn update_block<P, T>(
+        &self,
+        block_id: P,
+        block: T,
+    ) -> Result<Block, Error>
+    where
+        P: AsIdentifier<BlockId>,
+        T: Into<CreateBlock>,
+    {
+        // using CreateBlock is not perfect
+        // technically speaking you can update text on a todo block and not touch checked by not settings it
+        // but I don't want to create a new type for this
+        // or make checked optional in CreateBlock
+        let result = self
+            .make_json_request(
+                self.client
+                    .patch(&format!(
+                        "https://api.notion.com/v1/blocks/{block_id}",
+                        block_id = block_id.as_id()
+                    ))
+                    .json(&block.into()),
+            )
+            .await?;
+
+        match result {
+            Object::Block { block } => Ok(block),
             response => Err(Error::UnexpectedResponse { response }),
         }
     }

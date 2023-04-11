@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::ids::{AsIdentifier, DatabaseId, PageId};
-use crate::models::block::{Block, CreateBlock};
+use crate::models::block::{Block, CreateBlock, FileOrEmojiObject};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
 use crate::models::users::User;
@@ -182,12 +182,26 @@ impl Properties {
     }
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq)]
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 pub struct PageCreateRequest {
     pub parent: Parent,
     pub properties: Properties,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub children: Option<Vec<CreateBlock>>,
+}
+
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+pub struct UpdateBlockChildrenRequest {
+    pub children: Vec<CreateBlock>,
+}
+
+#[derive(Serialize, Debug, Eq, PartialEq)]
+pub struct PageUpdateRequest {
+    pub properties: Properties,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub archived: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub icon: Option<FileOrEmojiObject>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
