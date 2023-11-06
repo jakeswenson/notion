@@ -82,6 +82,7 @@ fn rich_text_mention_user_person() {
               "https://secure.notion-static.com/e6a352a8-8381-44d0-a1dc-9ed80e62b53d.jpg"
                 .to_string()
             ),
+            ty: Some("person".to_string())
           },
           person: Person {
             email: "john.doe@gmail.com".to_string()

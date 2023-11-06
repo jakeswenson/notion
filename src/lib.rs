@@ -2,122 +2,71 @@ use crate::ids::{BlockId, DatabaseId};
 use crate::models::error::ErrorResponse;
 use crate::models::search::{DatabaseQuery, SearchRequest};
 use crate::models::{Database, ListResponse, Object, Page};
+pub use chrono;
+use http::header;
 use ids::{AsIdentifier, PageId};
 use models::block::Block;
+use models::users::User;
 use models::PageCreateRequest;
-use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::{header, Client, ClientBuilder, RequestBuilder};
-use tracing::Instrument;
+
+#[cfg(target_arch = "wasm32")]
+mod spin;
+#[cfg(target_arch = "wasm32")]
+use spin as notion_api;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod request;
+#[cfg(not(target_arch = "wasm32"))]
+use request as notion_api;
 
 pub mod ids;
 pub mod models;
 
-pub use chrono;
+pub use notion_api::NotionApi;
 
-const NOTION_API_VERSION: &str = "2022-02-22";
+const NOTION_API_VERSION: &str = "2022-06-28";
+const BASE_URL: &str = "https://api.notion.com/v1";
 
 /// An wrapper Error type for all errors produced by the [`NotionApi`](NotionApi) client.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Invalid Notion API Token: {}", source)]
-    InvalidApiToken { source: header::InvalidHeaderValue },
-
-    #[error("Unable to build reqwest HTTP client: {}", source)]
-    ErrorBuildingClient { source: reqwest::Error },
-
-    #[error("Error sending HTTP request: {}", source)]
-    RequestFailed {
-        #[from]
-        source: reqwest::Error,
-    },
+    #[error("{0}")]
+    InvalidApiToken(#[from] header::InvalidHeaderValue),
 
     #[error("Error reading response: {}", source)]
-    ResponseIoError { source: reqwest::Error },
+    ResponseIoError { source: http::Error },
 
-    #[error("Error parsing json response: {}", source)]
-    JsonParseError { source: serde_json::Error },
+    #[error("{0}")]
+    Json(#[from] serde_json::Error),
 
     #[error("Unexpected API Response")]
     UnexpectedResponse { response: Object },
 
     #[error("API Error {}({}): {}", .error.code, .error.status, .error.message)]
     ApiError { error: ErrorResponse },
-}
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error("{0}")]
+    Reqwest(#[from] reqwest::Error),
 
-/// An API client for Notion.
-/// Create a client by using [new(api_token: String)](Self::new()).
-#[derive(Clone)]
-pub struct NotionApi {
-    client: Client,
+    #[cfg(target_arch = "wasm32")]
+    #[error("{0}")]
+    Send(#[from] spin_sdk::http::SendError),
+
+    #[cfg(target_arch = "wasm32")]
+    #[error("{0}")]
+    Http(#[from] http::Error),
+
+    #[cfg(target_arch = "wasm32")]
+    #[error("{0}")]
+    Url(#[from] url::ParseError),
 }
 
 impl NotionApi {
-    /// Creates an instance of NotionApi.
-    /// May fail if the provided api_token is an improper value.
-    pub fn new(api_token: String) -> Result<Self, Error> {
-        let mut headers = HeaderMap::new();
-        headers.insert(
-            "Notion-Version",
-            HeaderValue::from_static(NOTION_API_VERSION),
-        );
-
-        let mut auth_value = HeaderValue::from_str(&format!("Bearer {}", api_token))
-            .map_err(|source| Error::InvalidApiToken { source })?;
-        auth_value.set_sensitive(true);
-        headers.insert(header::AUTHORIZATION, auth_value);
-
-        let client = ClientBuilder::new()
-            .default_headers(headers)
-            .build()
-            .map_err(|source| Error::ErrorBuildingClient { source })?;
-
-        Ok(Self { client })
-    }
-
-    async fn make_json_request(
-        &self,
-        request: RequestBuilder,
-    ) -> Result<Object, Error> {
-        let request = request.build()?;
-        let url = request.url();
-        tracing::trace!(
-            method = request.method().as_str(),
-            url = url.as_str(),
-            "Sending request"
-        );
-        let json = self
-            .client
-            .execute(request)
-            .instrument(tracing::trace_span!("Sending request"))
-            .await
-            .map_err(|source| Error::RequestFailed { source })?
-            .text()
-            .instrument(tracing::trace_span!("Reading response"))
-            .await
-            .map_err(|source| Error::ResponseIoError { source })?;
-
-        tracing::debug!("JSON Response: {}", json);
-        #[cfg(test)]
-        {
-            dbg!(serde_json::from_str::<serde_json::Value>(&json)
-                .map_err(|source| Error::JsonParseError { source })?);
-        }
-        let result =
-            serde_json::from_str(&json).map_err(|source| Error::JsonParseError { source })?;
-
-        match result {
-            Object::Error { error } => Err(Error::ApiError { error }),
-            response => Ok(response),
-        }
-    }
-
     /// List all the databases shared with the supplied integration token.
     /// > This method is apparently deprecated/"not recommended" and
     /// > [search()](Self::search()) should be used instead.
     pub async fn list_databases(&self) -> Result<ListResponse<Database>, Error> {
-        let builder = self.client.get("https://api.notion.com/v1/databases");
-
-        match self.make_json_request(builder).await? {
+        match self.get("databases").await? {
             Object::List { list } => Ok(list.expect_databases()?),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -130,15 +79,9 @@ impl NotionApi {
         &self,
         query: T,
     ) -> Result<ListResponse<Object>, Error> {
-        let result = self
-            .make_json_request(
-                self.client
-                    .post("https://api.notion.com/v1/search")
-                    .json(&query.into()),
-            )
-            .await?;
-
-        match result {
+        let search_request: SearchRequest = query.into();
+        let search_request = serde_json::to_vec(&search_request)?;
+        match self.post("search", search_request).await? {
             Object::List { list } => Ok(list),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -149,14 +92,10 @@ impl NotionApi {
         &self,
         database_id: T,
     ) -> Result<Database, Error> {
-        let result = self
-            .make_json_request(self.client.get(format!(
-                "https://api.notion.com/v1/databases/{}",
-                database_id.as_id()
-            )))
-            .await?;
-
-        match result {
+        match self
+            .get(&format!("databases/{}", database_id.as_id()))
+            .await?
+        {
             Object::Database { database } => Ok(database),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -167,14 +106,7 @@ impl NotionApi {
         &self,
         page_id: T,
     ) -> Result<Page, Error> {
-        let result = self
-            .make_json_request(self.client.get(format!(
-                "https://api.notion.com/v1/pages/{}",
-                page_id.as_id()
-            )))
-            .await?;
-
-        match result {
+        match self.get(&format!("pages/{}", page_id.as_id())).await? {
             Object::Page { page } => Ok(page),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -185,15 +117,9 @@ impl NotionApi {
         &self,
         page: T,
     ) -> Result<Page, Error> {
-        let result = self
-            .make_json_request(
-                self.client
-                    .post("https://api.notion.com/v1/pages")
-                    .json(&page.into()),
-            )
-            .await?;
-
-        match result {
+        let page: PageCreateRequest = page.into();
+        let page = serde_json::to_vec(&page)?;
+        match self.post("pages", page).await? {
             Object::Page { page } => Ok(page),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -209,17 +135,17 @@ impl NotionApi {
         T: Into<DatabaseQuery>,
         D: AsIdentifier<DatabaseId>,
     {
-        let result = self
-            .make_json_request(
-                self.client
-                    .post(&format!(
-                        "https://api.notion.com/v1/databases/{database_id}/query",
-                        database_id = database.as_id()
-                    ))
-                    .json(&query.into()),
+        let query: DatabaseQuery = query.into();
+        match self
+            .post(
+                &format!(
+                    "databases/{database_id}/query",
+                    database_id = database.as_id()
+                ),
+                query,
             )
-            .await?;
-        match result {
+            .await?
+        {
             Object::List { list } => Ok(list.expect_pages()?),
             response => Err(Error::UnexpectedResponse { response }),
         }
@@ -229,15 +155,21 @@ impl NotionApi {
         &self,
         block_id: T,
     ) -> Result<ListResponse<Block>, Error> {
-        let result = self
-            .make_json_request(self.client.get(&format!(
-                "https://api.notion.com/v1/blocks/{block_id}/children",
+        match self
+            .get(&format!(
+                "blocks/{block_id}/children",
                 block_id = block_id.as_id()
-            )))
-            .await?;
-
-        match result {
+            ))
+            .await?
+        {
             Object::List { list } => Ok(list.expect_blocks()?),
+            response => Err(Error::UnexpectedResponse { response }),
+        }
+    }
+
+    pub async fn list_users(&self) -> Result<ListResponse<User>, Error> {
+        match self.get("users").await? {
+            Object::List { list } => Ok(list.expect_users()?),
             response => Err(Error::UnexpectedResponse { response }),
         }
     }

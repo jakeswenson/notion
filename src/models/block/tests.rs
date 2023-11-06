@@ -26,11 +26,13 @@ mod tests {
                         id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
                         name: None,
                         avatar_url: None,
+                        ty: None
                     },
                     last_edited_by: UserCommon {
                         id: UserId::from_str("6419f912-5293-4ea8-b2c8-9c3ce44f90e3").unwrap(),
                         name: None,
                         avatar_url: None,
+                        ty: None
                     },
                 },
                 heading_1: TextBlockModel {
@@ -258,11 +260,13 @@ mod tests {
                             id: UserId::from_str("e2507360-468c-4e0f-a928-7bbcbbb45353").unwrap(),
                             name: None,
                             avatar_url: None,
+                            ty: None
                         },
                         last_edited_by: UserCommon {
                             id: UserId::from_str("e2507360-468c-4e0f-a928-7bbcbbb45353").unwrap(),
                             name: None,
                             avatar_url: None,
+                            ty: None
                         },
                     },
                     callout: Callout {

@@ -148,6 +148,23 @@ impl ListResponse<Object> {
             next_cursor: self.next_cursor,
         })
     }
+
+    pub(crate) fn expect_users(self) -> Result<ListResponse<User>, crate::Error> {
+        let items: Result<Vec<_>, _> = self
+            .results
+            .into_iter()
+            .map(|object| match object {
+                Object::User { user } => Ok(user),
+                response => Err(Error::UnexpectedResponse { response }),
+            })
+            .collect();
+
+        Ok(ListResponse {
+            results: items?,
+            has_more: self.has_more,
+            next_cursor: self.next_cursor,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]

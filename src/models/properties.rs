@@ -215,7 +215,7 @@ pub enum PropertyConfiguration {
     /// See <https://developers.notion.com/reference/database#last-edited-time-configuration>
     LastEditedTime { id: PropertyId },
     /// See <https://developers.notion.com/reference/database#last-edited-by-configuration>
-    LastEditBy { id: PropertyId },
+    LastEditedBy { id: PropertyId },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -232,6 +232,22 @@ pub struct SelectedValue {
 pub enum DateOrDateTime {
     Date(NaiveDate),
     DateTime(DateTime<Utc>),
+}
+
+impl std::fmt::Display for DateOrDateTime {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                DateOrDateTime::Date(date) => date.to_string(),
+                DateOrDateTime::DateTime(dt) => dt.to_rfc3339(),
+            }
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
