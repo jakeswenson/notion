@@ -3,48 +3,48 @@ use crate::models::paging::{Pageable, Paging, PagingCursor};
 use crate::models::Number;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeMap;
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum SortDirection {
     Ascending,
     Descending,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum SortTimestamp {
     LastEditedTime,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FilterValue {
     Page,
     Database,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FilterProperty {
     Object,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Sort {
     /// The name of the timestamp to sort against.
     timestamp: SortTimestamp,
     direction: SortDirection,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct Filter {
     property: FilterProperty,
     value: FilterValue,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Default)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
 pub struct SearchRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     query: Option<String>,
@@ -56,7 +56,7 @@ pub struct SearchRequest {
     paging: Option<Paging>,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum TextCondition {
     Equals(String),
@@ -86,7 +86,7 @@ where
     serializer.serialize_map(Some(0))?.end()
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum NumberCondition {
     Equals(Number),
@@ -101,14 +101,14 @@ pub enum NumberCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum CheckboxCondition {
     Equals(bool),
     DoesNotEqual(bool),
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum SelectCondition {
     /// Only return pages where the page property value matches the provided value exactly.
@@ -123,7 +123,7 @@ pub enum SelectCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum MultiSelectCondition {
     /// Only return pages where the page property value contains the provided value.
@@ -138,7 +138,7 @@ pub enum MultiSelectCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum DateCondition {
     /// Only return pages where the page property value matches the provided date exactly.
@@ -187,7 +187,7 @@ pub enum DateCondition {
     NextYear,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum PeopleCondition {
     Contains(UserId),
@@ -201,7 +201,7 @@ pub enum PeopleCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FilesCondition {
     /// Only return pages where the page property value is empty.
@@ -212,7 +212,7 @@ pub enum FilesCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum RelationCondition {
     /// Only return pages where the page property value contains the provided value.
@@ -227,7 +227,7 @@ pub enum RelationCondition {
     IsNotEmpty,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FormulaCondition {
     /// Only return pages where the result type of the page property formula is "text"
@@ -244,7 +244,7 @@ pub enum FormulaCondition {
     Date(DateCondition),
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum PropertyCondition {
     RichText(TextCondition),
@@ -259,7 +259,7 @@ pub enum PropertyCondition {
     Formula(FormulaCondition),
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum FilterCondition {
     Property {
@@ -273,14 +273,14 @@ pub enum FilterCondition {
     Or { or: Vec<FilterCondition> },
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Hash, Copy, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum DatabaseSortTimestamp {
     CreatedTime,
     LastEditedTime,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct DatabaseSort {
     // Todo: Should property and timestamp be mutually exclusive? (i.e a flattened enum?)
     //  the documentation is not clear:
@@ -293,7 +293,7 @@ pub struct DatabaseSort {
     pub direction: SortDirection,
 }
 
-#[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct DatabaseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sorts: Option<Vec<DatabaseSort>>,

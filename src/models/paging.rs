@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[serde(transparent)]
 pub struct PagingCursor(String);
 
-#[derive(Serialize, Debug, Eq, PartialEq, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct Paging {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub start_cursor: Option<PagingCursor>,
