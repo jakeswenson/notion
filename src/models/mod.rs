@@ -11,11 +11,13 @@ pub mod users;
 use crate::models::properties::{PropertyConfiguration, PropertyValue};
 use crate::models::text::RichText;
 use crate::Error;
+use block::ExternalFileObject;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
 
 use crate::ids::{AsIdentifier, DatabaseId, PageId};
-use crate::models::block::{Block, CreateBlock};
+use crate::models::block::{Block, CreateBlock, FileObject};
 use crate::models::error::ErrorResponse;
 use crate::models::paging::PagingCursor;
 use crate::models::users::User;
@@ -48,7 +50,24 @@ pub struct Database {
     //
     // value object
     // A Property object.
+    pub icon: Option<IconObject>,
     pub properties: HashMap<String, PropertyConfiguration>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum IconObject {
+    File {
+        #[serde(flatten)]
+        file: FileObject,
+    },
+    External {
+        external: ExternalFileObject,
+    },
+    Emoji {
+        emoji: String,
+    },
 }
 
 impl AsIdentifier<DatabaseId> for Database {
@@ -200,6 +219,7 @@ pub struct Page {
     /// The archived status of the page.
     pub archived: bool,
     pub properties: Properties,
+    pub icon: Option<IconObject>,
     pub parent: Parent,
 }
 

@@ -156,11 +156,15 @@ pub struct Rollup {
 pub enum PropertyConfiguration {
     /// Represents the special Title property required on every database.
     /// See <https://developers.notion.com/reference/database#title-configuration>
-    Title { id: PropertyId },
+    Title {
+        id: PropertyId,
+    },
     /// Represents a Text property
     /// <https://developers.notion.com/reference/database#text-configuration>
     #[serde(rename = "rich_text")]
-    Text { id: PropertyId },
+    Text {
+        id: PropertyId,
+    },
     /// Represents a Number Property
     /// See <https://developers.notion.com/reference/database#number-configuration>
     Number {
@@ -170,9 +174,15 @@ pub enum PropertyConfiguration {
     },
     /// Represents a Select Property
     /// See <https://developers.notion.com/reference/database#select-configuration>
-    Select { id: PropertyId, select: Select },
+    Select {
+        id: PropertyId,
+        select: Select,
+    },
     /// Represents a Status property
-    Status { id: PropertyId, status: Status },
+    Status {
+        id: PropertyId,
+        status: Status,
+    },
     /// Represents a Multi-select Property
     /// See <https://developers.notion.com/reference/database#multi-select-configuration>
     MultiSelect {
@@ -181,41 +191,78 @@ pub enum PropertyConfiguration {
     },
     /// Represents a Date Property
     /// See <https://developers.notion.com/reference/database#date-configuration>
-    Date { id: PropertyId },
+    Date {
+        id: PropertyId,
+    },
     /// Represents a People Property
     /// See <https://developers.notion.com/reference/database#people-configuration>
-    People { id: PropertyId },
+    People {
+        id: PropertyId,
+    },
     /// Represents a File Property
     /// See <https://developers.notion.com/reference/database#file-configuration>
     // Todo: File a bug with notion
     //       Documentation issue: docs claim type name is `file` but it is in fact `files`
-    Files { id: PropertyId },
+    Files {
+        id: PropertyId,
+    },
     /// Represents a Checkbox Property
     /// See <https://developers.notion.com/reference/database#checkbox-configuration>
-    Checkbox { id: PropertyId },
+    Checkbox {
+        id: PropertyId,
+    },
     /// Represents a URL Property
     /// See <https://developers.notion.com/reference/database#url-configuration>
-    Url { id: PropertyId },
+    Url {
+        id: PropertyId,
+    },
     /// Represents a Email Property
     /// See <https://developers.notion.com/reference/database#email-configuration>
-    Email { id: PropertyId },
+    Email {
+        id: PropertyId,
+    },
     /// Represents a Phone number Property
     /// See <https://developers.notion.com/reference/database#phone-number-configuration>
-    PhoneNumber { id: PropertyId },
+    PhoneNumber {
+        id: PropertyId,
+    },
     /// See <https://developers.notion.com/reference/database#formula-configuration>
-    Formula { id: PropertyId, formula: Formula },
+    Formula {
+        id: PropertyId,
+        formula: Formula,
+    },
     /// See <https://developers.notion.com/reference/database#relation-configuration>
-    Relation { id: PropertyId, relation: Relation },
+    Relation {
+        id: PropertyId,
+        relation: Relation,
+    },
     /// See <https://developers.notion.com/reference/database#rollup-configuration>
-    Rollup { id: PropertyId, rollup: Rollup },
+    Rollup {
+        id: PropertyId,
+        rollup: Rollup,
+    },
     /// See <https://developers.notion.com/reference/database#created-time-configuration>
-    CreatedTime { id: PropertyId },
+    CreatedTime {
+        id: PropertyId,
+    },
     /// See <https://developers.notion.com/reference/database#created-by-configuration>
-    CreatedBy { id: PropertyId },
+    CreatedBy {
+        id: PropertyId,
+    },
     /// See <https://developers.notion.com/reference/database#last-edited-time-configuration>
-    LastEditedTime { id: PropertyId },
+    LastEditedTime {
+        id: PropertyId,
+    },
     /// See <https://developers.notion.com/reference/database#last-edited-by-configuration>
-    LastEditBy { id: PropertyId },
+    LastEditBy {
+        id: PropertyId,
+    },
+    UniqueId {
+        id: PropertyId,
+    },
+    Button {
+        id: PropertyId,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -333,16 +380,25 @@ pub enum PropertyValue {
         rollup: Option<RollupValue>,
     },
     /// <https://developers.notion.com/reference/property-object#people-configuration>
-    People { id: PropertyId, people: Vec<User> },
+    People {
+        id: PropertyId,
+        people: Vec<User>,
+    },
     /// <https://developers.notion.com/reference/property-object#files-configuration>
     Files {
         id: PropertyId,
         files: Option<Vec<FileReference>>,
     },
     /// <https://developers.notion.com/reference/property-object#checkbox-configuration>
-    Checkbox { id: PropertyId, checkbox: bool },
+    Checkbox {
+        id: PropertyId,
+        checkbox: bool,
+    },
     /// <https://developers.notion.com/reference/property-object#url-configuration>
-    Url { id: PropertyId, url: Option<String> },
+    Url {
+        id: PropertyId,
+        url: Option<String>,
+    },
     /// <https://developers.notion.com/reference/property-object#email-configuration>
     Email {
         id: PropertyId,
@@ -359,7 +415,10 @@ pub enum PropertyValue {
         created_time: DateTime<Utc>,
     },
     /// <https://developers.notion.com/reference/property-object#created-by-configuration>
-    CreatedBy { id: PropertyId, created_by: User },
+    CreatedBy {
+        id: PropertyId,
+        created_by: User,
+    },
     /// <https://developers.notion.com/reference/property-object#last-edited-time-configuration>
     LastEditedTime {
         id: PropertyId,
@@ -370,6 +429,19 @@ pub enum PropertyValue {
         id: PropertyId,
         last_edited_by: User,
     },
+    UniqueId {
+        id: PropertyId,
+        unique_id: UniqueidValue,
+    },
+    Button {
+        id: PropertyId,
+    },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct UniqueidValue {
+    pub prefix: Option<String>,
+    pub number: u32,
 }
 
 /// <https://developers.notion.com/reference/page#rollup-property-value-element>
