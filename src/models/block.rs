@@ -320,7 +320,7 @@ pub enum Block {
     ChildDatabase {
         #[serde(flatten)]
         common: BlockCommon,
-        child_page: ChildDatabaseFields,
+        child_database: ChildDatabaseFields,
     },
     Embed {
         #[serde(flatten)]
@@ -481,7 +481,7 @@ impl Into<CreateBlock> for Block {
             Block::Toggle { toggle, .. } => CreateBlock::Toggle { toggle },
             Block::Code { code, .. } => CreateBlock::Code { code },
             Block::ChildPage { child_page, .. } => CreateBlock::ChildPage { child_page },
-            Block::ChildDatabase { child_page, .. } => CreateBlock::ChildDatabase { child_page },
+            Block::ChildDatabase { child_database, .. } => CreateBlock::ChildDatabase { child_database },
             Block::Embed { embed, .. } => CreateBlock::Embed { embed },
             Block::Image { image, .. } => CreateBlock::Image { image },
             Block::Video { video, .. } => CreateBlock::Video { video },
@@ -553,7 +553,7 @@ pub enum CreateBlock {
         child_page: ChildPageFields,
     },
     ChildDatabase {
-        child_page: ChildDatabaseFields,
+        child_database: ChildDatabaseFields,
     },
     Embed {
         embed: EmbedFields,
